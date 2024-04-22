@@ -1,8 +1,15 @@
-In this project, I am building a program that will be able to play the Head's Up No Limit Texas Hold'em variant of poker. Currently, this code allows two human players to play against each other.
-It handles each of the four betting rounds, deals the community cards in their proper order, and can evaluate which player has the best five card poker hand if the players get to showdown their hands.
-It keeps track of the player's stack sizes, the amount in the pot, and it displays the amount required to match the other player's bet. It can detect when a betting round has ended, and it also can detect when a player runs out of chips.
-In addition to being able to play full games of poker against another human opponent, it can also calculate the exact win probabilities of each player at each stage of the game. It accomplished this through the construction of an
-n-ary tree whose nodes are all possible community cards that could occur on subsequent betting rounds. The tree is created, and the win probability for each possible community card configuration that could occur is calculated.
-These win probabilities are then recursively stored in each node of the tree to be accessed once the game has started. This code can also switch between discrete betting sizes and continuous betting sizes as well. 
-The probability tree can be turned on by building the executable file with the macro "PROBILITY" defined at compile time, and the continuous betting can also be turned on with the macro "NORMALBETTING" defined at compile time.
-Both of these featured can be used separately or together when building the execuatble file.
+# Heads Up No Limit Texas Hold'em Poker Simulator
+## Overview
+This project is a simulator for the Heads Up No Limit Texas Hold'em variant of poker. The program facilitates games between two human players, managing the intricacies of gameplay and betting rounds. It is designed to handle the full scope of a poker game, including card dealing, betting, and hand evaluation at showdown.
+## Features
+- Gameplay Mechanics: Supports all four betting rounds typical to Texas Hold'em. Deals community cards in the prescribed sequence and evaluates the best five-card poker hand at showdown.
+- Player and Pot Management: Tracks each player's chip stack and the total pot amount. Displays the current bet required to match the opposing player's wager.
+- End of Game Detection: Identifies the conclusion of betting rounds and detects when a player has depleted their chip stack.
+- Win Probability Calculation: Includes an optional advanced feature to calculate the exact win probabilities for each player at various stages of the game. This is achieved by constructing an n-ary tree of all potential future community card combinations, with win probabilities calculated and stored at each node.
+## Betting Configurations
+- Discrete and Continuous Betting: The simulator can toggle between discrete fixed betting sizes and a continuous betting range.
+Probability Tree: To activate win probability calculations, compile the executable with the PROBABILITY macro defined.
+- Continuous Betting: Enable this feature by defining the NORMALBETTING macro at compile time.
+## Compilation Instructions
+Both the PROBABILITY and NORMALBETTING features can be activated individually or in conjunction. To include them in your build, use the following macros during compilation: "-D PROBABILITY" or "-D NORMALBETTING".
+Compile your program with the desired macros to customize the functionality as needed.

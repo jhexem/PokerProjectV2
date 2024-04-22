@@ -9,7 +9,7 @@ int main(int argc, char* argv[]) {
 
    const int numThreads = std::atoi(argv[1]);
 
-   bool play72Rule = true; //true means 72 rule is turned on, false means it is turned off
+   bool play72Rule = false; //true means 72 rule is turned on, false means it is turned off
    double bounty72Rule = 10.0; //bounty in big blinds for winning a hand with 72o
 
    double p1StartingStack = 100.0;

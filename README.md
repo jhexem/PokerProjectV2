@@ -1,0 +1,8 @@
+In this project, I am building a program that will be able to play the Head's Up No Limit Texas Hold'em variant of poker. Currently, this code allows two human players to play against each other.
+It handles each of the four betting rounds, deals the community cards in their proper order, and can evaluate which player has the best five card poker hand if the players get to showdown their hands.
+It keeps track of the player's stack sizes, the amount in the pot, and it displays the amount required to match the other player's bet. It can detect when a betting round has ended, and it also can detect when a player runs out of chips.
+In addition to being able to play full games of poker against another human opponent, it can also calculate the exact win probabilities of each player at each stage of the game. It accomplished this through the construction of an
+n-ary tree whose nodes are all possible community cards that could occur on subsequent betting rounds. The tree is created, and the win probability for each possible community card configuration that could occur is calculated.
+These win probabilities are then recursively stored in each node of the tree to be accessed once the game has started. This code can also switch between discrete betting sizes and continuous betting sizes as well. 
+The probability tree can be turned on by building the executable file with the macro "PROBILITY" defined at compile time, and the continuous betting can also be turned on with the macro "NORMALBETTING" defined at compile time.
+Both of these featured can be used separately or together when building the execuatble file.

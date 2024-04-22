@@ -11,5 +11,4 @@ This project is a simulator for the Heads Up No Limit Texas Hold'em variant of p
 Probability Tree: To activate win probability calculations, compile the executable with the PROBABILITY macro defined.
 - Continuous Betting: Enable this feature by defining the NORMALBETTING macro at compile time.
 ## Compilation Instructions
-Both the PROBABILITY and NORMALBETTING features can be activated individually or in conjunction. To include them in your build, use the following macros during compilation: "-D PROBABILITY" or "-D NORMALBETTING".
-Compile your program with the desired macros to customize the functionality as needed.
+Both the PROBABILITY and NORMALBETTING features can be activated individually or in conjunction. To include them in your build, use the following macros during compilation: "-D PROBABILITY" or "-D NORMALBETTING". I used c++-14 when compiling this project as well. Compile your program with the desired macros to customize the functionality as needed.

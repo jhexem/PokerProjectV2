@@ -3,7 +3,7 @@
 
 #include "pokerClasses.hpp"
 
-double populateTree(Node* node, Dealer &dealer) {
+float populateTree(Node* node, Dealer &dealer) {
    if (node->children.empty()) {
       std::vector<int> flop;
       flop.assign(node->cards.begin(), node->cards.begin() + 3);
@@ -11,12 +11,12 @@ double populateTree(Node* node, Dealer &dealer) {
       dealer.dealFlop(flop);
       dealer.dealTurnOrRiver(node->cards[3]);
       dealer.dealTurnOrRiver(node->cards[4]);
-      std::vector<double> playerWins = dealer.rankHands();
+      std::vector<float> playerWins = dealer.rankHands();
       dealer.resetEverythingPostflop();
       node->winProb = playerWins[0];
       return playerWins[0];
    }
-   double wins = 0.0;
+   float wins = 0.0;
    for (Node* child : node->children) {
       wins += populateTree(child, dealer);
    }
@@ -24,8 +24,8 @@ double populateTree(Node* node, Dealer &dealer) {
    return node->winProb;
 }
 
-void populateSubtree(Node* tree, Dealer dealer, double &probSum, std::mutex &probSumMutex, int numThreads, int id) {
-   double partialProbSum = 0.0;
+void populateSubtree(Node* tree, Dealer dealer, float &probSum, std::mutex &probSumMutex, int numThreads, int id) {
+   float partialProbSum = 0.0;
    int numNodes = tree->children.size();
    int start = (numNodes / numThreads) * id;
    int end = (id == numThreads - 1) ? numNodes : (numNodes / numThreads) * (id + 1);
@@ -38,7 +38,7 @@ void populateSubtree(Node* tree, Dealer dealer, double &probSum, std::mutex &pro
 }
 
 void parallelPopulateTree(Node* tree, Dealer &dealer, int numThreads) {
-   double probSum = 0.0;
+   float probSum = 0.0;
    std::vector<std::thread> threads(numThreads);
    std::mutex probSumMutex;
 

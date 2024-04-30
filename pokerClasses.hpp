@@ -126,6 +126,135 @@ class Deck {
       }
 };
 
+class Range {
+   public:
+      int triangleNumbers[12] = {0, 1, 3, 6, 10, 15, 21, 28, 36, 45, 55, 66};
+
+      float pairs[78] = {0.0};  //2D array of all pairs stored in row major ordering
+      //value orders: 2, 3, 4, 5, 6, 7, 8, 9, T, J, Q, K, A
+      //suit orders: cd, ch, cs, dh, ds, hs
+      float nonpairs[1248] = {0.0};  //3D triangular wedge shaped array of all nonpaired hands stored in row major ordering
+      //value orders: 2, 3, 4, 5, 6, 7, 8, 9, T, J, Q, K, A
+      //suit orders: cc, dd, hh, ss, cd, ch, cs, dc, dh, ds, hc, hd, hs, sc, sd, sh
+
+      void addHand(int card1, int card2, float weight) {
+         int suitIndex;
+         if (checkPair(card1, card2)) {
+            suitIndex = getPairSuitIndex(card1, card2);
+            int valueIndex = card1 / 4;
+            pairs[suitIndex * 13 + valueIndex] = weight;
+         }
+         suitIndex = getNonpairSuitIndex(card1, card2);
+         int valueIndex1 = std::min(card1 / 4, card2 / 4);
+         int valueIndex2 = std::max(card1 / 4, card2 / 4);
+         nonpairs[suitIndex * 78 + triangleNumbers[valueIndex1-1] + valueIndex2] = weight;
+      }
+
+      void addHand(int card1, int card2, float weight) {
+         int suitIndex;
+         if (checkPair(card1, card2)) {
+            suitIndex = getPairSuitIndex(card1, card2);
+            int valueIndex = card1 / 4;
+            pairs[suitIndex * 13 + valueIndex] = weight;
+         }
+         suitIndex = getNonpairSuitIndex(card1, card2);
+         int valueIndex1 = std::min(card1 / 4, card2 / 4);
+         int valueIndex2 = std::max(card1 / 4, card2 / 4);
+         nonpairs[suitIndex * 78 + triangleNumbers[valueIndex1-1] + valueIndex2] = weight;
+      }
+
+      void removeHand(int card1, int card2) {
+         int suitIndex;
+         if (checkPair(card1, card2)) {
+            suitIndex = getPairSuitIndex(card1, card2);
+            int valueIndex = card1 / 4;
+            pairs[suitIndex * 13 + valueIndex] = 0.0;
+         }
+         suitIndex = getNonpairSuitIndex(card1, card2);
+         int valueIndex1 = std::max(card1 / 4, card2 / 4);
+         int valueIndex2 = std::min(card1 / 4, card2 / 4);
+         nonpairs[suitIndex * 78 + triangleNumbers[valueIndex1-1] + valueIndex2] = 0.0;
+      }
+
+      float viewHand(int card1, int card2) {
+         int suitIndex;
+         if (checkPair(card1, card2)) {
+            suitIndex = getPairSuitIndex(card1, card2);
+            int valueIndex = card1 / 4;
+            return pairs[suitIndex * 13 + valueIndex];
+         }
+         suitIndex = getNonpairSuitIndex(card1, card2);
+         int valueIndex1 = std::max(card1 / 4, card2 / 4);
+         int valueIndex2 = std::min(card1 / 4, card2 / 4);
+         return nonpairs[suitIndex * 78 + triangleNumbers[valueIndex1-1] + valueIndex2];
+      }
+
+      bool isInRange(int card1, int card2) {
+         int suitIndex;
+         if (checkPair(card1, card2)) {
+            suitIndex = getPairSuitIndex(card1, card2);
+            int valueIndex = card1 / 4;
+            if (pairs[suitIndex * 13 + valueIndex] > 0.0) {return true;}
+            return false;
+         }
+         suitIndex = getNonpairSuitIndex(card1, card2);
+         int valueIndex1 = std::max(card1 / 4, card2 / 4);
+         int valueIndex2 = std::min(card1 / 4, card2 / 4);
+         if (nonpairs[suitIndex * 78 + triangleNumbers[valueIndex1-1] + valueIndex2] > 0.0) {return true;}
+         return false;
+      }
+
+      bool checkPair(int card1, int card2) {
+         if (card1 / 4 == card2 / 4) {return true;}
+         return false;
+      }
+
+      int getPairSuitIndex(int card1, int card2) {
+         int suit1 = card1 % 4;
+         int suit2 = card2 % 4;
+
+         if ((suit1 == 0 or suit1 == 1) and suit2 == 0 or suit2 == 1) {return 0;}
+         if ((suit1 == 0 or suit1 == 2) and suit2 == 0 or suit2 == 2) {return 1;}
+         if ((suit1 == 0 or suit1 == 3) and suit2 == 0 or suit2 == 3) {return 2;}
+         if ((suit1 == 1 or suit1 == 2) and suit2 == 1 or suit2 == 2) {return 3;}
+         if ((suit1 == 1 or suit1 == 3) and suit2 == 1 or suit2 == 3) {return 4;}
+         if ((suit1 == 2 or suit1 == 3) and suit2 == 2 or suit2 == 3) {return 5;}
+
+         std::cout << "Cannot find suit index for paired hand" << std::endl;
+         return 6;
+      }
+
+      int getNonpairSuitIndex(int card1, int card2) {
+         int suit1 = card1 % 4;
+         int suit2 = card2 % 4;
+
+         if (suit1 == suit2) {return suit1;}
+
+         if (suit1 == 0) {
+            if (suit2 == 1) {return 4;}
+            if (suit2 == 2) {return 5;}
+            if (suit2 == 3) {return 6;}
+         }
+         if (suit1 == 1) {
+            if (suit2 == 0) {return 7;}
+            if (suit2 == 2) {return 8;}
+            if (suit2 == 3) {return 9;}
+         }
+         if (suit1 == 2) {
+            if (suit2 == 0) {return 10;}
+            if (suit2 == 1) {return 11;}
+            if (suit2 == 3) {return 12;}
+         }
+         if (suit2 == 3) {
+            if (suit2 == 0) {return 13;}
+            if (suit2 == 1) {return 14;}
+            if (suit2 == 2) {return 15;}
+         }
+         std::cout << "Cannot find suit index for nonpaired hand" << std::endl;
+         return 16;
+      }
+};
+
 class Player {
    private:
       char values[13] = {'2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A'};
@@ -134,13 +263,13 @@ class Player {
    public:
       int name;
       std::vector<int> hand;
-      double stack;
+      float stack;
       std::vector<int> fullHand;
       std::vector<std::vector<int>> fiveCardHands;
       std::vector<std::string> keys;
       std::unordered_map<std::string, int> handRanks;
 
-      Player(int input, double startingStack) {
+      Player(int input, float startingStack) {
          name = input;
          stack = startingStack;
 
@@ -359,15 +488,15 @@ class Dealer {
       Deck deck;
       std::vector<Player> players;
       int numPlayers;
-      double pot;
+      float pot;
       bool p1Button;
-      double smallBlind;
-      double bigBlind;
+      float smallBlind;
+      float bigBlind;
       std::vector<int> board;
       std::unordered_map<std::string, int> handRanks;
       std::vector<int> deadCards;
       bool play72Rule;
-      double bounty72Rule;
+      float bounty72Rule;
 
       Dealer(std::vector<std::string> deadCardStr) {
          int numDeadCards = deadCardStr.size();
@@ -393,7 +522,7 @@ class Dealer {
          bigBlind = 1.0;
       }
 
-      Dealer(std::vector<std::string> deadCardStr, double startingStack) {
+      Dealer(std::vector<std::string> deadCardStr, float startingStack) {
          int numDeadCards = deadCardStr.size();
          for (int i=0; i<numDeadCards; i++) {
             deadCards.push_back(getInt(deadCardStr[i]));
@@ -415,7 +544,7 @@ class Dealer {
          p1Button = false;
       }
 
-      Dealer(double p1StartingStack, double p2StartingStack, double SB, double BB, bool play72, double bounty72) {
+      Dealer(float p1StartingStack, float p2StartingStack, float SB, float BB, bool play72, float bounty72) {
          numPlayers = 2;
          Deck deck;
          std::vector<Player> newPlayers;
@@ -483,9 +612,9 @@ class Dealer {
       }
 
       void showStacks() {
-         if (players[0].stack < 1e-10) {
+         if (players[0].stack < 1e-4) {
             players[0].stack = 0.0;
-         } else if (players[1].stack < 1e-10) {
+         } else if (players[1].stack < 1e-4) {
             players[1].stack = 0.0;
          }
          std::cout << "Player 1's Stack: " << players[0].stack << std::endl;
@@ -500,7 +629,7 @@ class Dealer {
          return decision;
       }
 
-      std::string getFixedPlayerDecision(Player player, std::vector<double> validBetSizes, std::vector<double> validRaiseSizes, bool isBet) {
+      std::string getFixedPlayerDecision(Player player, std::vector<float> validBetSizes, std::vector<float> validRaiseSizes, bool isBet) {
          std::string decision;
          if (isBet) {
             std::cout << "Player " << player.name << " make your decision (f = fold, c = check/call, b1 = bet " << validBetSizes[0] << ", b2 = bet " << validBetSizes[1] << ", b3 = bet " << validBetSizes[2] << "): ";
@@ -512,8 +641,8 @@ class Dealer {
          return decision;
       }
 
-      std::vector<double> getValidFixedSizes(std::vector<double> validSizes, double minBet, double p1Stack, double p2Stack) {
-         double maxBet = std::min(p1Stack, p2Stack);
+      std::vector<float> getValidFixedSizes(std::vector<float> validSizes, float minBet, float p1Stack, float p2Stack) {
+         float maxBet = std::min(p1Stack, p2Stack);
          if (maxBet < minBet) {
             validSizes[0] = maxBet;
             validSizes[1] = maxBet;
@@ -542,14 +671,14 @@ class Dealer {
          std::vector<std::string> playerHands = getAllHands();
 
          int checkWin; //if checkWin = player.name, then that player won. If checkWin = 0, then both players matched each other's bet. If checkWin = -1 then one or both players are all in.
-         double amountToCall = 0.0;
+         float amountToCall = 0.0;
          bool betMatched = false;
-         double totalBetAmountP1 = 0.0;
-         double totalBetAmountP2 = 0.0;
-         double p1StartingStack = players[0].stack;
-         double p2StartingStack = players[1].stack;
+         float totalBetAmountP1 = 0.0;
+         float totalBetAmountP2 = 0.0;
+         float p1StartingStack = players[0].stack;
+         float p2StartingStack = players[1].stack;
          bool isAllIn = false;
-         double remainingStack;
+         float remainingStack;
 
          if (p1Button) {
             if (players[0].stack <= smallBlind or players[1].stack <= smallBlind) {
@@ -630,8 +759,8 @@ class Dealer {
                      }
                   } else if (p1Decision == "b" and not isAllIn) {
                      if (amountToCall > 0) {
-                        double p1raise;
-                        double p1raiseAbsolute;
+                        float p1raise;
+                        float p1raiseAbsolute;
                         bool p1raiseInvalid = true;
                         while (p1raiseInvalid) {
                            std::cout << "Raise to: ";
@@ -654,13 +783,13 @@ class Dealer {
                         }
                         break;
                      } else {
-                        double p1betAbsolute;
+                        float p1betAbsolute;
                         bool p1betInvalid = true;
                         while (p1betInvalid) {
                            std::cout << "Bet amount: ";
                            std::cin >> p1betAbsolute;
                            std::cout << std::endl;
-                           double p1bet = p1betAbsolute - totalBetAmountP1;
+                           float p1bet = p1betAbsolute - totalBetAmountP1;
                            if (p1bet >= bigBlind and p1betAbsolute <= p2StartingStack) {
                               if (p1betAbsolute == p2StartingStack) {
                                  isAllIn = true;
@@ -716,8 +845,8 @@ class Dealer {
                      }
                   } else if (p2Decision == "b" and not isAllIn) {
                      if (amountToCall > 0) {
-                        double p2raise;
-                        double p2raiseAbsolute;
+                        float p2raise;
+                        float p2raiseAbsolute;
                         bool p2raiseInvalid = true;
                         while (p2raiseInvalid) {
                            std::cout << "Raise to: ";
@@ -740,13 +869,13 @@ class Dealer {
                         }
                         break;
                      } else {
-                        double p2betAbsolute;
+                        float p2betAbsolute;
                         bool p2betInvalid = true;
                         while (p2betInvalid) {
                            std::cout << "Bet amount: ";
                            std::cin >> p2betAbsolute;
                            std::cout << std::endl;
-                           double p2bet = p2betAbsolute - totalBetAmountP2;
+                           float p2bet = p2betAbsolute - totalBetAmountP2;
                            if (p2bet >= bigBlind and p2betAbsolute <= p1StartingStack) {
                               if (p2betAbsolute == p1StartingStack) {
                                  isAllIn = true;
@@ -852,8 +981,8 @@ class Dealer {
                      }
                   } else if (p2Decision == "b" and not isAllIn) {
                      if (amountToCall > 0) {
-                        double p2raise;
-                        double p2raiseAbsolute;
+                        float p2raise;
+                        float p2raiseAbsolute;
                         bool p2raiseInvalid = true;
                         while (p2raiseInvalid) {
                            std::cout << "Raise to: ";
@@ -876,13 +1005,13 @@ class Dealer {
                         }
                         break;
                      } else {
-                        double p2betAbsolute;
+                        float p2betAbsolute;
                         bool p2betInvalid = true;
                         while (p2betInvalid) {
                            std::cout << "Bet amount: ";
                            std::cin >> p2betAbsolute;
                            std::cout << std::endl;
-                           double p2bet = p2betAbsolute - totalBetAmountP2;
+                           float p2bet = p2betAbsolute - totalBetAmountP2;
                            if (p2bet >= bigBlind and p2bet <= p1StartingStack) {
                               if (p2betAbsolute == p1StartingStack) {
                                  isAllIn = true;
@@ -938,8 +1067,8 @@ class Dealer {
                      }
                   } else if (p1Decision == "b" and not isAllIn) {
                      if (amountToCall > 0) {
-                        double p1raise;
-                        double p1raiseAbsolute;
+                        float p1raise;
+                        float p1raiseAbsolute;
                         bool p1raiseInvalid = true;
                         while (p1raiseInvalid) {
                            std::cout << "Raise to: ";
@@ -962,13 +1091,13 @@ class Dealer {
                         }
                         break;
                      } else {
-                        double p1betAbsolute;
+                        float p1betAbsolute;
                         bool p1betInvalid = true;
                         while (p1betInvalid) {
                            std::cout << "Bet amount: ";
                            std::cin >> p1betAbsolute;
                            std::cout << std::endl;
-                           double p1bet = p1betAbsolute - totalBetAmountP1;
+                           float p1bet = p1betAbsolute - totalBetAmountP1;
                            if (p1bet >= bigBlind and p1bet <= p2StartingStack) {
                               if (p1betAbsolute == p2StartingStack) {
                                  isAllIn = true;
@@ -1002,12 +1131,12 @@ class Dealer {
          std::vector<std::string> playerHands = getAllHands();
 
          int checkWin; //If checkWin = player.name, then that player won. If checkWin = 0, then both players matched each other's bet. If checkWin = -1 then one or both players are all in.
-         double amountToCall = 0.0;
+         float amountToCall = 0.0;
          bool betMatched = false;
-         double totalBetAmountP1 = 0.0;
-         double totalBetAmountP2 = 0.0;
-         double p1StartingStack = players[0].stack;
-         double p2StartingStack = players[1].stack;
+         float totalBetAmountP1 = 0.0;
+         float totalBetAmountP2 = 0.0;
+         float p1StartingStack = players[0].stack;
+         float p2StartingStack = players[1].stack;
          bool isAllIn = false;
 
          if (not p1Button) {
@@ -1043,8 +1172,8 @@ class Dealer {
                      }
                   } else if (p1Decision == "b" and not isAllIn) {
                      if (amountToCall > 0) {
-                        double p1raise;
-                        double p1raiseAbsolute;
+                        float p1raise;
+                        float p1raiseAbsolute;
                         bool p1raiseInvalid = true;
                         while (p1raiseInvalid) {
                            std::cout << "Raise to: ";
@@ -1067,7 +1196,7 @@ class Dealer {
                         }
                         break;
                      } else {
-                        double p1bet;
+                        float p1bet;
                         bool p1betInvalid = true;
                         while (p1betInvalid) {
                            std::cout << "Bet amount: ";
@@ -1128,8 +1257,8 @@ class Dealer {
                      }
                   } else if (p2Decision == "b" and not isAllIn) {
                      if (amountToCall > 0) {
-                        double p2raise;
-                        double p2raiseAbsolute;
+                        float p2raise;
+                        float p2raiseAbsolute;
                         bool p2raiseInvalid = true;
                         while (p2raiseInvalid) {
                            std::cout << "Raise to: ";
@@ -1152,7 +1281,7 @@ class Dealer {
                         }
                         break;
                      } else {
-                        double p2bet;
+                        float p2bet;
                         bool p2betInvalid = true;
                         while (p2betInvalid) {
                            std::cout << "Bet amount: ";
@@ -1217,8 +1346,8 @@ class Dealer {
                      }
                   } else if (p2Decision == "b" and not isAllIn) {
                      if (amountToCall > 0) {
-                        double p2raise;
-                        double p2raiseAbsolute;
+                        float p2raise;
+                        float p2raiseAbsolute;
                         bool p2raiseInvalid = true;
                         while (p2raiseInvalid) {
                            std::cout << "Raise to: ";
@@ -1241,7 +1370,7 @@ class Dealer {
                         }
                         break;
                      } else {
-                        double p2bet;
+                        float p2bet;
                         bool p2betInvalid = true;
                         while (p2betInvalid) {
                            std::cout << "Bet amount: ";
@@ -1302,8 +1431,8 @@ class Dealer {
                      }
                   } else if (p1Decision == "b" and not isAllIn) {
                      if (amountToCall > 0) {
-                        double p1raise;
-                        double p1raiseAbsolute;
+                        float p1raise;
+                        float p1raiseAbsolute;
                         bool p1raiseInvalid = true;
                         while (p1raiseInvalid) {
                            std::cout << "Raise to: ";
@@ -1326,7 +1455,7 @@ class Dealer {
                         }
                         break;
                      } else {
-                        double p1bet;
+                        float p1bet;
                         bool p1betInvalid = true;
                         while (p1betInvalid) {
                            std::cout << "Bet amount: ";
@@ -1361,18 +1490,18 @@ class Dealer {
          }
       }
 
-      int startFixedPreFlopBettingRound(const double* betSizes, const double* raiseSizes) {
+      int startFixedPreFlopBettingRound(const float* betSizes, const float* raiseSizes) {
          std::vector<std::string> playerHands = getAllHands();
 
          int checkWin; //If checkWin = player.name, then that player won. If checkWin = 0, then both players matched each other's bet. If checkWin = -1 then one or both players are all in.
-         double amountToCall = 0.0;
+         float amountToCall = 0.0;
          bool betMatched = false;
-         double totalBetAmountP1 = 0.0;
-         double totalBetAmountP2 = 0.0;
-         double p1StartingStack = players[0].stack;
-         double p2StartingStack = players[1].stack;
+         float totalBetAmountP1 = 0.0;
+         float totalBetAmountP2 = 0.0;
+         float p1StartingStack = players[0].stack;
+         float p2StartingStack = players[1].stack;
          bool isAllIn = false;
-         double remainingStack;
+         float remainingStack;
 
          if (p1Button) {
             if (players[0].stack <= smallBlind or players[1].stack <= smallBlind) {
@@ -1421,7 +1550,7 @@ class Dealer {
 
             while (not betMatched) {
                while (true) {
-                  if (((players[0].stack - amountToCall <= 1e-10) and (players[0].stack - amountToCall >= -1e-10)) or ((players[1].stack - amountToCall <= 1e-10) and (players[1].stack - amountToCall >= -1e-10)) and (pot != smallBlind + bigBlind)) {
+                  if (((players[0].stack - amountToCall <= 1e-4) and (players[0].stack - amountToCall >= -1e-4)) or ((players[1].stack - amountToCall <= 1e-4) and (players[1].stack - amountToCall >= -1e-4)) and (pot != smallBlind + bigBlind)) {
                      isAllIn = true;
                   }
                   std::cout << "------------------------" << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl;
@@ -1432,8 +1561,8 @@ class Dealer {
                   std::cout << std::endl;
                   showStacks();
                   std::cout << std::endl;
-                  std::vector<double> validBetSizes = {pot * betSizes[0], pot * betSizes[1], pot * betSizes[2]};
-                  std::vector<double> validRaiseSizes = {totalBetAmountP2 * raiseSizes[0], totalBetAmountP2 * raiseSizes[1], totalBetAmountP2 * raiseSizes[2]};
+                  std::vector<float> validBetSizes = {pot * betSizes[0], pot * betSizes[1], pot * betSizes[2]};
+                  std::vector<float> validRaiseSizes = {totalBetAmountP2 * raiseSizes[0], totalBetAmountP2 * raiseSizes[1], totalBetAmountP2 * raiseSizes[2]};
                   validBetSizes = getValidFixedSizes(validBetSizes, bigBlind, p1StartingStack, p2StartingStack);
                   validRaiseSizes = getValidFixedSizes(validRaiseSizes, amountToCall + totalBetAmountP2, p1StartingStack, p2StartingStack);
                   std::string p1Decision;
@@ -1464,8 +1593,8 @@ class Dealer {
                         break;
                      }
                   } else if (p1Decision == "b1" and not isAllIn) {
-                     double p1raise;
-                     double p1raiseAbsolute;
+                     float p1raise;
+                     float p1raiseAbsolute;
                      p1raiseAbsolute = validRaiseSizes[0];
                      p1raise = p1raiseAbsolute - totalBetAmountP1;
                      totalBetAmountP1 = totalBetAmountP1 + p1raise;
@@ -1473,13 +1602,13 @@ class Dealer {
                      players[0].stack = players[0].stack - p1raise;
                      pot = pot + p1raise;
                      amountToCall = p1raise - amountToCall;
-                     if (((players[0].stack <= 1e-10) and (players[0].stack >= -1e-10)) or ((players[1].stack <= 1e-10) and (players[1].stack >= -1e-10))) {
+                     if (((players[0].stack <= 1e-4) and (players[0].stack >= -1e-4)) or ((players[1].stack <= 1e-4) and (players[1].stack >= -1e-4))) {
                         isAllIn = true;
                      }
                      break;
                   } else if (p1Decision == "b2" and not isAllIn) {
-                     double p1raise;
-                     double p1raiseAbsolute;
+                     float p1raise;
+                     float p1raiseAbsolute;
                      p1raiseAbsolute = validRaiseSizes[1];
                      p1raise = p1raiseAbsolute - totalBetAmountP1;
                      totalBetAmountP1 = totalBetAmountP1 + p1raise;
@@ -1487,13 +1616,13 @@ class Dealer {
                      players[0].stack = players[0].stack - p1raise;
                      pot = pot + p1raise;
                      amountToCall = p1raise - amountToCall;
-                     if (((players[0].stack <= 1e-10) and (players[0].stack >= -1e-10)) or ((players[1].stack <= 1e-10) and (players[1].stack >= -1e-10))) {
+                     if (((players[0].stack <= 1e-4) and (players[0].stack >= -1e-4)) or ((players[1].stack <= 1e-4) and (players[1].stack >= -1e-4))) {
                         isAllIn = true;
                      }
                      break;
                   } else if (p1Decision == "b3" and not isAllIn) {
-                     double p1raise;
-                     double p1raiseAbsolute;
+                     float p1raise;
+                     float p1raiseAbsolute;
                      p1raiseAbsolute = validRaiseSizes[2];
                      p1raise = p1raiseAbsolute - totalBetAmountP1;
                      totalBetAmountP1 = totalBetAmountP1 + p1raise;
@@ -1501,7 +1630,7 @@ class Dealer {
                      players[0].stack = players[0].stack - p1raise;
                      pot = pot + p1raise;
                      amountToCall = p1raise - amountToCall;
-                     if (((players[0].stack <= 1e-10) and (players[0].stack >= -1e-10)) or ((players[1].stack <= 1e-10) and (players[1].stack >= -1e-10))) {
+                     if (((players[0].stack <= 1e-4) and (players[0].stack >= -1e-4)) or ((players[1].stack <= 1e-4) and (players[1].stack >= -1e-4))) {
                         isAllIn = true;
                      }
                      break;
@@ -1513,7 +1642,7 @@ class Dealer {
                   break;
                }
                while (true) {
-                  if (((players[0].stack - amountToCall <= 1e-10) and (players[0].stack - amountToCall >= -1e-10)) or ((players[1].stack - amountToCall <= 1e-10) and (players[1].stack - amountToCall >= -1e-10)) and (pot != smallBlind + bigBlind)) {
+                  if (((players[0].stack - amountToCall <= 1e-4) and (players[0].stack - amountToCall >= -1e-4)) or ((players[1].stack - amountToCall <= 1e-4) and (players[1].stack - amountToCall >= -1e-4)) and (pot != smallBlind + bigBlind)) {
                      isAllIn = true;
                   }
                   std::cout << "------------------------" << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl;
@@ -1524,8 +1653,8 @@ class Dealer {
                   std::cout << std::endl;
                   showStacks();
                   std::cout << std::endl;
-                  std::vector<double> validBetSizes = {pot * betSizes[0], pot * betSizes[1], pot * betSizes[2]};
-                  std::vector<double> validRaiseSizes = {totalBetAmountP1 * raiseSizes[0], totalBetAmountP1 * raiseSizes[1], totalBetAmountP1 * raiseSizes[2]};
+                  std::vector<float> validBetSizes = {pot * betSizes[0], pot * betSizes[1], pot * betSizes[2]};
+                  std::vector<float> validRaiseSizes = {totalBetAmountP1 * raiseSizes[0], totalBetAmountP1 * raiseSizes[1], totalBetAmountP1 * raiseSizes[2]};
                   validBetSizes = getValidFixedSizes(validBetSizes, bigBlind, p1StartingStack, p2StartingStack);
                   validRaiseSizes = getValidFixedSizes(validRaiseSizes, amountToCall + totalBetAmountP1, p1StartingStack, p2StartingStack);
                   std::string p2Decision;
@@ -1550,8 +1679,8 @@ class Dealer {
                         break;
                      }
                   } else if (p2Decision == "b1" and not isAllIn) {
-                     double p2raise;
-                     double p2raiseAbsolute;
+                     float p2raise;
+                     float p2raiseAbsolute;
                      p2raiseAbsolute = validRaiseSizes[0];
                      p2raise = p2raiseAbsolute - totalBetAmountP2;
                      totalBetAmountP2 = totalBetAmountP2 + p2raise;
@@ -1559,13 +1688,13 @@ class Dealer {
                      players[1].stack = players[1].stack - p2raise;
                      pot = pot + p2raise;
                      amountToCall = p2raise - amountToCall;
-                     if (((players[0].stack <= 1e-10) and (players[0].stack >= -1e-10)) or ((players[1].stack <= 1e-10) and (players[1].stack >= -1e-10))) {
+                     if (((players[0].stack <= 1e-4) and (players[0].stack >= -1e-4)) or ((players[1].stack <= 1e-4) and (players[1].stack >= -1e-4))) {
                         isAllIn = true;
                      }
                      break;
                   } else if (p2Decision == "b2" and not isAllIn) {
-                     double p2raise;
-                     double p2raiseAbsolute;
+                     float p2raise;
+                     float p2raiseAbsolute;
                      p2raiseAbsolute = validRaiseSizes[1];
                      p2raise = p2raiseAbsolute - totalBetAmountP2;
                      totalBetAmountP2 = totalBetAmountP2 + p2raise;
@@ -1573,13 +1702,13 @@ class Dealer {
                      players[1].stack = players[1].stack - p2raise;
                      pot = pot + p2raise;
                      amountToCall = p2raise - amountToCall;
-                     if (((players[0].stack <= 1e-10) and (players[0].stack >= -1e-10)) or ((players[1].stack <= 1e-10) and (players[1].stack >= -1e-10))) {
+                     if (((players[0].stack <= 1e-4) and (players[0].stack >= -1e-4)) or ((players[1].stack <= 1e-4) and (players[1].stack >= -1e-4))) {
                         isAllIn = true;
                      }
                      break;
                   } else if (p2Decision == "b3" and not isAllIn) {
-                     double p2raise;
-                     double p2raiseAbsolute;
+                     float p2raise;
+                     float p2raiseAbsolute;
                      p2raiseAbsolute = validRaiseSizes[2];
                      p2raise = p2raiseAbsolute - totalBetAmountP2;
                      totalBetAmountP2 = totalBetAmountP2 + p2raise;
@@ -1587,7 +1716,7 @@ class Dealer {
                      players[1].stack = players[1].stack - p2raise;
                      pot = pot + p2raise;
                      amountToCall = p2raise - amountToCall;
-                     if (((players[0].stack <= 1e-10) and (players[0].stack >= -1e-10)) or ((players[1].stack <= 1e-10) and (players[1].stack >= -1e-10))) {
+                     if (((players[0].stack <= 1e-4) and (players[0].stack >= -1e-4)) or ((players[1].stack <= 1e-4) and (players[1].stack >= -1e-4))) {
                         isAllIn = true;
                      }
                      break;
@@ -1648,7 +1777,7 @@ class Dealer {
 
             while (not betMatched) {
                while (true) {
-                  if (((players[0].stack - amountToCall <= 1e-10) and (players[0].stack - amountToCall >= -1e-10)) or ((players[1].stack - amountToCall <= 1e-10) and (players[1].stack - amountToCall >= -1e-10)) and (pot != smallBlind + bigBlind)) {
+                  if (((players[0].stack - amountToCall <= 1e-4) and (players[0].stack - amountToCall >= -1e-4)) or ((players[1].stack - amountToCall <= 1e-4) and (players[1].stack - amountToCall >= -1e-4)) and (pot != smallBlind + bigBlind)) {
                      isAllIn = true;
                   }
                   std::cout << "------------------------" << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl;
@@ -1659,8 +1788,8 @@ class Dealer {
                   std::cout << std::endl;
                   showStacks();
                   std::cout << std::endl;
-                  std::vector<double> validBetSizes = {pot * betSizes[0], pot * betSizes[1], pot * betSizes[2]};
-                  std::vector<double> validRaiseSizes = {totalBetAmountP1 * raiseSizes[0], totalBetAmountP1 * raiseSizes[1], totalBetAmountP1 * raiseSizes[2]};
+                  std::vector<float> validBetSizes = {pot * betSizes[0], pot * betSizes[1], pot * betSizes[2]};
+                  std::vector<float> validRaiseSizes = {totalBetAmountP1 * raiseSizes[0], totalBetAmountP1 * raiseSizes[1], totalBetAmountP1 * raiseSizes[2]};
                   validBetSizes = getValidFixedSizes(validBetSizes, bigBlind, p1StartingStack, p2StartingStack);
                   validRaiseSizes = getValidFixedSizes(validRaiseSizes, amountToCall + totalBetAmountP1, p1StartingStack, p2StartingStack);
                   std::string p2Decision;
@@ -1691,8 +1820,8 @@ class Dealer {
                         break;
                      }
                   } else if (p2Decision == "b1" and not isAllIn) {
-                     double p2raise;
-                     double p2raiseAbsolute;
+                     float p2raise;
+                     float p2raiseAbsolute;
                      p2raiseAbsolute = validRaiseSizes[0];
                      p2raise = p2raiseAbsolute - totalBetAmountP2;
                      totalBetAmountP2 = totalBetAmountP2 + p2raise;
@@ -1700,13 +1829,13 @@ class Dealer {
                      players[1].stack = players[1].stack - p2raise;
                      pot = pot + p2raise;
                      amountToCall = p2raise - amountToCall;
-                     if (((players[0].stack <= 1e-10) and (players[0].stack >= -1e-10)) or ((players[1].stack <= 1e-10) and (players[1].stack >= -1e-10))) {
+                     if (((players[0].stack <= 1e-4) and (players[0].stack >= -1e-4)) or ((players[1].stack <= 1e-4) and (players[1].stack >= -1e-4))) {
                         isAllIn = true;
                      }
                      break;
                   } else if (p2Decision == "b2" and not isAllIn) {
-                     double p2raise;
-                     double p2raiseAbsolute;
+                     float p2raise;
+                     float p2raiseAbsolute;
                      p2raiseAbsolute = validRaiseSizes[1];
                      p2raise = p2raiseAbsolute - totalBetAmountP2;
                      totalBetAmountP2 = totalBetAmountP2 + p2raise;
@@ -1714,13 +1843,13 @@ class Dealer {
                      players[1].stack = players[1].stack - p2raise;
                      pot = pot + p2raise;
                      amountToCall = p2raise - amountToCall;
-                     if (((players[0].stack <= 1e-10) and (players[0].stack >= -1e-10)) or ((players[1].stack <= 1e-10) and (players[1].stack >= -1e-10))) {
+                     if (((players[0].stack <= 1e-4) and (players[0].stack >= -1e-4)) or ((players[1].stack <= 1e-4) and (players[1].stack >= -1e-4))) {
                         isAllIn = true;
                      }
                      break;
                   } else if (p2Decision == "b3" and not isAllIn) {
-                     double p2raise;
-                     double p2raiseAbsolute;
+                     float p2raise;
+                     float p2raiseAbsolute;
                      p2raiseAbsolute = validRaiseSizes[2];
                      p2raise = p2raiseAbsolute - totalBetAmountP2;
                      totalBetAmountP2 = totalBetAmountP2 + p2raise;
@@ -1728,7 +1857,7 @@ class Dealer {
                      players[1].stack = players[1].stack - p2raise;
                      pot = pot + p2raise;
                      amountToCall = p2raise - amountToCall;
-                     if (((players[0].stack <= 1e-10) and (players[0].stack >= -1e-10)) or ((players[1].stack <= 1e-10) and (players[1].stack >= -1e-10))) {
+                     if (((players[0].stack <= 1e-4) and (players[0].stack >= -1e-4)) or ((players[1].stack <= 1e-4) and (players[1].stack >= -1e-4))) {
                         isAllIn = true;
                      }
                      break;
@@ -1740,7 +1869,7 @@ class Dealer {
                   break;
                }
                while (true) {
-                  if (((players[0].stack - amountToCall <= 1e-10) and (players[0].stack - amountToCall >= -1e-10)) or ((players[1].stack - amountToCall <= 1e-10) and (players[1].stack - amountToCall >= -1e-10)) and (pot != smallBlind + bigBlind)) {
+                  if (((players[0].stack - amountToCall <= 1e-4) and (players[0].stack - amountToCall >= -1e-4)) or ((players[1].stack - amountToCall <= 1e-4) and (players[1].stack - amountToCall >= -1e-4)) and (pot != smallBlind + bigBlind)) {
                      isAllIn = true;
                   }
                   std::cout << "------------------------" << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl;
@@ -1751,8 +1880,8 @@ class Dealer {
                   std::cout << std::endl;
                   showStacks();
                   std::cout << std::endl;
-                  std::vector<double> validBetSizes = {pot * betSizes[0], pot * betSizes[1], pot * betSizes[2]};
-                  std::vector<double> validRaiseSizes = {totalBetAmountP2 * raiseSizes[0], totalBetAmountP2 * raiseSizes[1], totalBetAmountP2 * raiseSizes[2]};
+                  std::vector<float> validBetSizes = {pot * betSizes[0], pot * betSizes[1], pot * betSizes[2]};
+                  std::vector<float> validRaiseSizes = {totalBetAmountP2 * raiseSizes[0], totalBetAmountP2 * raiseSizes[1], totalBetAmountP2 * raiseSizes[2]};
                   validBetSizes = getValidFixedSizes(validBetSizes, bigBlind, p1StartingStack, p2StartingStack);
                   validRaiseSizes = getValidFixedSizes(validRaiseSizes, amountToCall + totalBetAmountP2, p1StartingStack, p2StartingStack);
                   std::string p1Decision;
@@ -1777,8 +1906,8 @@ class Dealer {
                         break;
                      }
                   } else if (p1Decision == "b1" and not isAllIn) {
-                     double p1raise;
-                     double p1raiseAbsolute;
+                     float p1raise;
+                     float p1raiseAbsolute;
                      p1raiseAbsolute = validRaiseSizes[0];
                      p1raise = p1raiseAbsolute - totalBetAmountP1;
                      totalBetAmountP1 = totalBetAmountP1 + p1raise;
@@ -1786,13 +1915,13 @@ class Dealer {
                      players[0].stack = players[0].stack - p1raise;
                      pot = pot + p1raise;
                      amountToCall = p1raise - amountToCall;
-                     if (((players[0].stack <= 1e-10) and (players[0].stack >= -1e-10)) or ((players[1].stack <= 1e-10) and (players[1].stack >= -1e-10))) {
+                     if (((players[0].stack <= 1e-4) and (players[0].stack >= -1e-4)) or ((players[1].stack <= 1e-4) and (players[1].stack >= -1e-4))) {
                         isAllIn = true;
                      }
                      break;
                   } else if (p1Decision == "b2" and not isAllIn) {
-                     double p1raise;
-                     double p1raiseAbsolute;
+                     float p1raise;
+                     float p1raiseAbsolute;
                      p1raiseAbsolute = validRaiseSizes[1];
                      p1raise = p1raiseAbsolute - totalBetAmountP1;
                      totalBetAmountP1 = totalBetAmountP1 + p1raise;
@@ -1800,13 +1929,13 @@ class Dealer {
                      players[0].stack = players[0].stack - p1raise;
                      pot = pot + p1raise;
                      amountToCall = p1raise - amountToCall;
-                     if (((players[0].stack <= 1e-10) and (players[0].stack >= -1e-10)) or ((players[1].stack <= 1e-10) and (players[1].stack >= -1e-10))) {
+                     if (((players[0].stack <= 1e-4) and (players[0].stack >= -1e-4)) or ((players[1].stack <= 1e-4) and (players[1].stack >= -1e-4))) {
                         isAllIn = true;
                      }
                      break;
                   } else if (p1Decision == "b3" and not isAllIn) {
-                     double p1raise;
-                     double p1raiseAbsolute;
+                     float p1raise;
+                     float p1raiseAbsolute;
                      p1raiseAbsolute = validRaiseSizes[2];
                      p1raise = p1raiseAbsolute - totalBetAmountP1;
                      totalBetAmountP1 = totalBetAmountP1 + p1raise;
@@ -1814,7 +1943,7 @@ class Dealer {
                      players[0].stack = players[0].stack - p1raise;
                      pot = pot + p1raise;
                      amountToCall = p1raise - amountToCall;
-                     if (((players[0].stack <= 1e-10) and (players[0].stack >= -1e-10)) or ((players[1].stack <= 1e-10) and (players[1].stack >= -1e-10))) {
+                     if (((players[0].stack <= 1e-4) and (players[0].stack >= -1e-4)) or ((players[1].stack <= 1e-4) and (players[1].stack >= -1e-4))) {
                         isAllIn = true;
                      }
                      break;
@@ -1831,22 +1960,22 @@ class Dealer {
          }
       }
 
-      int startFixedPostFlopBettingRound(const double* betSizes, const double* raiseSizes) {
+      int startFixedPostFlopBettingRound(const float* betSizes, const float* raiseSizes) {
          std::vector<std::string> playerHands = getAllHands();
 
          int checkWin; //If checkWin = player.name, then that player won. If checkWin = 0, then both players matched each other's bet. If checkWin = -1 then one or both players are all in.
-         double amountToCall = 0.0;
+         float amountToCall = 0.0;
          bool betMatched = false;
-         double totalBetAmountP1 = 0.0;
-         double totalBetAmountP2 = 0.0;
-         double p1StartingStack = players[0].stack;
-         double p2StartingStack = players[1].stack;
+         float totalBetAmountP1 = 0.0;
+         float totalBetAmountP2 = 0.0;
+         float p1StartingStack = players[0].stack;
+         float p2StartingStack = players[1].stack;
          bool isAllIn = false;
 
          if (not p1Button) {
             while (not betMatched) {
                while (true) {
-                  if (((players[0].stack - amountToCall <= 1e-10) and (players[0].stack - amountToCall >= -1e-10)) or ((players[1].stack - amountToCall <= 1e-10) and (players[1].stack - amountToCall >= -1e-10))) {
+                  if (((players[0].stack - amountToCall <= 1e-4) and (players[0].stack - amountToCall >= -1e-4)) or ((players[1].stack - amountToCall <= 1e-4) and (players[1].stack - amountToCall >= -1e-4))) {
                      isAllIn = true;
                   }
                   std::cout << "------------------------" << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl;
@@ -1857,8 +1986,8 @@ class Dealer {
                   std::cout << std::endl;
                   showStacks();
                   std::cout << std::endl;
-                  std::vector<double> validBetSizes = {pot * betSizes[0], pot * betSizes[1], pot * betSizes[2]};
-                  std::vector<double> validRaiseSizes = {totalBetAmountP2 * raiseSizes[0], totalBetAmountP2 * raiseSizes[1], totalBetAmountP2 * raiseSizes[2]};
+                  std::vector<float> validBetSizes = {pot * betSizes[0], pot * betSizes[1], pot * betSizes[2]};
+                  std::vector<float> validRaiseSizes = {totalBetAmountP2 * raiseSizes[0], totalBetAmountP2 * raiseSizes[1], totalBetAmountP2 * raiseSizes[2]};
                   validBetSizes = getValidFixedSizes(validBetSizes, bigBlind, p1StartingStack, p2StartingStack);
                   validRaiseSizes = getValidFixedSizes(validRaiseSizes, amountToCall + totalBetAmountP2, p1StartingStack, p2StartingStack);
                   std::string p1Decision;
@@ -1887,8 +2016,8 @@ class Dealer {
                      }
                   } else if (p1Decision == "b1" and not isAllIn) {
                      if (amountToCall > 0) {
-                        double p1raise;
-                        double p1raiseAbsolute;
+                        float p1raise;
+                        float p1raiseAbsolute;
                         p1raiseAbsolute = validRaiseSizes[0];
                         p1raise = p1raiseAbsolute - totalBetAmountP1;
                         totalBetAmountP1 = totalBetAmountP1 + p1raise;
@@ -1896,27 +2025,27 @@ class Dealer {
                         players[0].stack = players[0].stack - p1raise;
                         pot = pot + p1raise;
                         amountToCall = p1raise - amountToCall;
-                        if (((players[0].stack <= 1e-10) and (players[0].stack >= -1e-10)) or ((players[1].stack <= 1e-10) and (players[1].stack >= -1e-10))) {
+                        if (((players[0].stack <= 1e-4) and (players[0].stack >= -1e-4)) or ((players[1].stack <= 1e-4) and (players[1].stack >= -1e-4))) {
                            isAllIn = true;
                         }
                         break;
                      } else {
-                        double p1bet;
+                        float p1bet;
                         p1bet = validBetSizes[0];
                         totalBetAmountP1 = totalBetAmountP1 + p1bet;
                         std::cout << "Player 1 bet " << p1bet << std::endl << std::endl;
                         players[0].stack = players[0].stack - p1bet;
                         pot = pot + p1bet;
                         amountToCall = p1bet;
-                        if (((players[0].stack <= 1e-10) and (players[0].stack >= -1e-10)) or ((players[1].stack <= 1e-10) and (players[1].stack >= -1e-10))) {
+                        if (((players[0].stack <= 1e-4) and (players[0].stack >= -1e-4)) or ((players[1].stack <= 1e-4) and (players[1].stack >= -1e-4))) {
                            isAllIn = true;
                         }
                         break;
                      }
                   } else if (p1Decision == "b2" and not isAllIn) {
                      if (amountToCall > 0) {
-                        double p1raise;
-                        double p1raiseAbsolute;
+                        float p1raise;
+                        float p1raiseAbsolute;
                         p1raiseAbsolute = validRaiseSizes[1];
                         p1raise = p1raiseAbsolute - totalBetAmountP1;
                         totalBetAmountP1 = totalBetAmountP1 + p1raise;
@@ -1924,27 +2053,27 @@ class Dealer {
                         players[0].stack = players[0].stack - p1raise;
                         pot = pot + p1raise;
                         amountToCall = p1raise - amountToCall;
-                        if (((players[0].stack <= 1e-10) and (players[0].stack >= -1e-10)) or ((players[1].stack <= 1e-10) and (players[1].stack >= -1e-10))) {
+                        if (((players[0].stack <= 1e-4) and (players[0].stack >= -1e-4)) or ((players[1].stack <= 1e-4) and (players[1].stack >= -1e-4))) {
                            isAllIn = true;
                         }
                         break;
                      } else {
-                        double p1bet;
+                        float p1bet;
                         p1bet = validBetSizes[1];
                         totalBetAmountP1 = totalBetAmountP1 + p1bet;
                         std::cout << "Player 1 bet " << p1bet << std::endl << std::endl;
                         players[0].stack = players[0].stack - p1bet;
                         pot = pot + p1bet;
                         amountToCall = p1bet;
-                        if (((players[0].stack <= 1e-10) and (players[0].stack >= -1e-10)) or ((players[1].stack <= 1e-10) and (players[1].stack >= -1e-10))) {
+                        if (((players[0].stack <= 1e-4) and (players[0].stack >= -1e-4)) or ((players[1].stack <= 1e-4) and (players[1].stack >= -1e-4))) {
                            isAllIn = true;
                         }
                         break;
                      }
                   } else if (p1Decision == "b3" and not isAllIn) {
                      if (amountToCall > 0) {
-                        double p1raise;
-                        double p1raiseAbsolute;
+                        float p1raise;
+                        float p1raiseAbsolute;
                         p1raiseAbsolute = validRaiseSizes[2];
                         p1raise = p1raiseAbsolute - totalBetAmountP1;
                         totalBetAmountP1 = totalBetAmountP1 + p1raise;
@@ -1952,19 +2081,19 @@ class Dealer {
                         players[0].stack = players[0].stack - p1raise;
                         pot = pot + p1raise;
                         amountToCall = p1raise - amountToCall;
-                        if (((players[0].stack <= 1e-10) and (players[0].stack >= -1e-10)) or ((players[1].stack <= 1e-10) and (players[1].stack >= -1e-10))) {
+                        if (((players[0].stack <= 1e-4) and (players[0].stack >= -1e-4)) or ((players[1].stack <= 1e-4) and (players[1].stack >= -1e-4))) {
                            isAllIn = true;
                         }
                         break;
                      } else {
-                        double p1bet;
+                        float p1bet;
                         p1bet = validBetSizes[2];
                         totalBetAmountP1 = totalBetAmountP1 + p1bet;
                         std::cout << "Player 1 bet " << p1bet << std::endl << std::endl;
                         players[0].stack = players[0].stack - p1bet;
                         pot = pot + p1bet;
                         amountToCall = p1bet;
-                        if (((players[0].stack <= 1e-10) and (players[0].stack >= -1e-10)) or ((players[1].stack <= 1e-10) and (players[1].stack >= -1e-10))) {
+                        if (((players[0].stack <= 1e-4) and (players[0].stack >= -1e-4)) or ((players[1].stack <= 1e-4) and (players[1].stack >= -1e-4))) {
                            isAllIn = true;
                         }
                         break;
@@ -1977,7 +2106,7 @@ class Dealer {
                   break;
                }
                while (true) {
-                  if (((players[0].stack - amountToCall <= 1e-10) and (players[0].stack - amountToCall >= -1e-10)) or ((players[1].stack - amountToCall <= 1e-10) and (players[1].stack - amountToCall >= -1e-10))) {
+                  if (((players[0].stack - amountToCall <= 1e-4) and (players[0].stack - amountToCall >= -1e-4)) or ((players[1].stack - amountToCall <= 1e-4) and (players[1].stack - amountToCall >= -1e-4))) {
                      isAllIn = true;
                   }
                   std::cout << "------------------------" << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl;
@@ -1988,8 +2117,8 @@ class Dealer {
                   std::cout << std::endl;
                   showStacks();
                   std::cout << std::endl;
-                  std::vector<double> validBetSizes = {pot * betSizes[0], pot * betSizes[1], pot * betSizes[2]};
-                  std::vector<double> validRaiseSizes = {totalBetAmountP1 * raiseSizes[0], totalBetAmountP1 * raiseSizes[1], totalBetAmountP1 * raiseSizes[2]};
+                  std::vector<float> validBetSizes = {pot * betSizes[0], pot * betSizes[1], pot * betSizes[2]};
+                  std::vector<float> validRaiseSizes = {totalBetAmountP1 * raiseSizes[0], totalBetAmountP1 * raiseSizes[1], totalBetAmountP1 * raiseSizes[2]};
                   validBetSizes = getValidFixedSizes(validBetSizes, bigBlind, p1StartingStack, p2StartingStack);
                   validRaiseSizes = getValidFixedSizes(validRaiseSizes, amountToCall + totalBetAmountP1, p1StartingStack, p2StartingStack);
                   std::string p2Decision;
@@ -2019,8 +2148,8 @@ class Dealer {
                      }
                   } else if (p2Decision == "b1" and not isAllIn) {
                      if (amountToCall > 0) {
-                        double p2raise;
-                        double p2raiseAbsolute;
+                        float p2raise;
+                        float p2raiseAbsolute;
                         p2raiseAbsolute = validRaiseSizes[0];
                         p2raise = p2raiseAbsolute - totalBetAmountP2;
                         totalBetAmountP2 = totalBetAmountP2 + p2raise;
@@ -2028,27 +2157,27 @@ class Dealer {
                         players[1].stack = players[1].stack - p2raise;
                         pot = pot + p2raise;
                         amountToCall = p2raise - amountToCall;
-                        if (((players[0].stack <= 1e-10) and (players[0].stack >= -1e-10)) or ((players[1].stack <= 1e-10) and (players[1].stack >= -1e-10))) {
+                        if (((players[0].stack <= 1e-4) and (players[0].stack >= -1e-4)) or ((players[1].stack <= 1e-4) and (players[1].stack >= -1e-4))) {
                            isAllIn = true;
                         }
                         break;
                      } else {
-                        double p2bet;
+                        float p2bet;
                         p2bet = validBetSizes[0];
                         totalBetAmountP2 = totalBetAmountP2 + p2bet;
                         std::cout << "Player 2 bet " << p2bet << std::endl << std::endl;
                         players[1].stack = players[1].stack - p2bet;
                         pot = pot + p2bet;
                         amountToCall = p2bet;
-                        if (((players[0].stack <= 1e-10) and (players[0].stack >= -1e-10)) or ((players[1].stack <= 1e-10) and (players[1].stack >= -1e-10))) {
+                        if (((players[0].stack <= 1e-4) and (players[0].stack >= -1e-4)) or ((players[1].stack <= 1e-4) and (players[1].stack >= -1e-4))) {
                            isAllIn = true;
                         }
                         break;
                      }
                   } else if (p2Decision == "b2" and not isAllIn) {
                      if (amountToCall > 0) {
-                        double p2raise;
-                        double p2raiseAbsolute;
+                        float p2raise;
+                        float p2raiseAbsolute;
                         p2raiseAbsolute = validRaiseSizes[1];
                         p2raise = p2raiseAbsolute - totalBetAmountP2;
                         totalBetAmountP2 = totalBetAmountP2 + p2raise;
@@ -2056,27 +2185,27 @@ class Dealer {
                         players[1].stack = players[1].stack - p2raise;
                         pot = pot + p2raise;
                         amountToCall = p2raise - amountToCall;
-                        if (((players[0].stack <= 1e-10) and (players[0].stack >= -1e-10)) or ((players[1].stack <= 1e-10) and (players[1].stack >= -1e-10))) {
+                        if (((players[0].stack <= 1e-4) and (players[0].stack >= -1e-4)) or ((players[1].stack <= 1e-4) and (players[1].stack >= -1e-4))) {
                            isAllIn = true;
                         }
                         break;
                      } else {
-                        double p2bet;
+                        float p2bet;
                         p2bet = validBetSizes[1];
                         totalBetAmountP2 = totalBetAmountP2 + p2bet;
                         std::cout << "Player 2 bet " << p2bet << std::endl << std::endl;
                         players[1].stack = players[1].stack - p2bet;
                         pot = pot + p2bet;
                         amountToCall = p2bet;
-                        if (((players[0].stack <= 1e-10) and (players[0].stack >= -1e-10)) or ((players[1].stack <= 1e-10) and (players[1].stack >= -1e-10))) {
+                        if (((players[0].stack <= 1e-4) and (players[0].stack >= -1e-4)) or ((players[1].stack <= 1e-4) and (players[1].stack >= -1e-4))) {
                            isAllIn = true;
                         }
                         break;
                      }
                   } else if (p2Decision == "b3" and not isAllIn) {
                      if (amountToCall > 0) {
-                        double p2raise;
-                        double p2raiseAbsolute;
+                        float p2raise;
+                        float p2raiseAbsolute;
                         p2raiseAbsolute = validRaiseSizes[2];
                         p2raise = p2raiseAbsolute - totalBetAmountP2;
                         totalBetAmountP2 = totalBetAmountP2 + p2raise;
@@ -2084,19 +2213,19 @@ class Dealer {
                         players[1].stack = players[1].stack - p2raise;
                         pot = pot + p2raise;
                         amountToCall = p2raise - amountToCall;
-                        if (((players[0].stack <= 1e-10) and (players[0].stack >= -1e-10)) or ((players[1].stack <= 1e-10) and (players[1].stack >= -1e-10))) {
+                        if (((players[0].stack <= 1e-4) and (players[0].stack >= -1e-4)) or ((players[1].stack <= 1e-4) and (players[1].stack >= -1e-4))) {
                            isAllIn = true;
                         }
                         break;
                      } else {
-                        double p2bet;
+                        float p2bet;
                         p2bet = validBetSizes[2];
                         totalBetAmountP2 = totalBetAmountP2 + p2bet;
                         std::cout << "Player 2 bet " << p2bet << std::endl << std::endl;
                         players[1].stack = players[1].stack - p2bet;
                         pot = pot + p2bet;
                         amountToCall = p2bet;
-                        if (((players[0].stack <= 1e-10) and (players[0].stack >= -1e-10)) or ((players[1].stack <= 1e-10) and (players[1].stack >= -1e-10))) {
+                        if (((players[0].stack <= 1e-4) and (players[0].stack >= -1e-4)) or ((players[1].stack <= 1e-4) and (players[1].stack >= -1e-4))) {
                            isAllIn = true;
                         }
                         break;
@@ -2114,7 +2243,7 @@ class Dealer {
          } else {
             while (not betMatched) {
                while (true) {
-                  if (((players[0].stack - amountToCall <= 1e-10) and (players[0].stack - amountToCall >= -1e-10)) or ((players[1].stack - amountToCall <= 1e-10) and (players[1].stack - amountToCall >= -1e-10))) {
+                  if (((players[0].stack - amountToCall <= 1e-4) and (players[0].stack - amountToCall >= -1e-4)) or ((players[1].stack - amountToCall <= 1e-4) and (players[1].stack - amountToCall >= -1e-4))) {
                      isAllIn = true;
                   }
                   std::cout << "------------------------" << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl;
@@ -2125,8 +2254,8 @@ class Dealer {
                   std::cout << std::endl;
                   showStacks();
                   std::cout << std::endl;
-                  std::vector<double> validBetSizes = {pot * betSizes[0], pot * betSizes[1], pot * betSizes[2]};
-                  std::vector<double> validRaiseSizes = {totalBetAmountP1 * raiseSizes[0], totalBetAmountP1 * raiseSizes[1], totalBetAmountP1 * raiseSizes[2]};
+                  std::vector<float> validBetSizes = {pot * betSizes[0], pot * betSizes[1], pot * betSizes[2]};
+                  std::vector<float> validRaiseSizes = {totalBetAmountP1 * raiseSizes[0], totalBetAmountP1 * raiseSizes[1], totalBetAmountP1 * raiseSizes[2]};
                   validBetSizes = getValidFixedSizes(validBetSizes, bigBlind, p1StartingStack, p2StartingStack);
                   validRaiseSizes = getValidFixedSizes(validRaiseSizes, amountToCall + totalBetAmountP1, p1StartingStack, p2StartingStack);
                   std::string p2Decision;
@@ -2155,8 +2284,8 @@ class Dealer {
                      }
                   } else if (p2Decision == "b1" and not isAllIn) {
                      if (amountToCall > 0) {
-                        double p2raise;
-                        double p2raiseAbsolute;
+                        float p2raise;
+                        float p2raiseAbsolute;
                         p2raiseAbsolute = validRaiseSizes[0];
                         p2raise = p2raiseAbsolute - totalBetAmountP2;
                         totalBetAmountP2 = totalBetAmountP2 + p2raise;
@@ -2164,27 +2293,27 @@ class Dealer {
                         players[1].stack = players[1].stack - p2raise;
                         pot = pot + p2raise;
                         amountToCall = p2raise - amountToCall;
-                        if (((players[0].stack <= 1e-10) and (players[0].stack >= -1e-10)) or ((players[1].stack <= 1e-10) and (players[1].stack >= -1e-10))) {
+                        if (((players[0].stack <= 1e-4) and (players[0].stack >= -1e-4)) or ((players[1].stack <= 1e-4) and (players[1].stack >= -1e-4))) {
                            isAllIn = true;
                         }
                         break;
                      } else {
-                        double p2bet;
+                        float p2bet;
                         p2bet = validBetSizes[0];
                         totalBetAmountP2 = totalBetAmountP2 + p2bet;
                         std::cout << "Player 2 bet " << p2bet << std::endl << std::endl;
                         players[1].stack = players[1].stack - p2bet;
                         pot = pot + p2bet;
                         amountToCall = p2bet;
-                        if (((players[0].stack <= 1e-10) and (players[0].stack >= -1e-10)) or ((players[1].stack <= 1e-10) and (players[1].stack >= -1e-10))) {
+                        if (((players[0].stack <= 1e-4) and (players[0].stack >= -1e-4)) or ((players[1].stack <= 1e-4) and (players[1].stack >= -1e-4))) {
                            isAllIn = true;
                         }
                         break;
                      }
                   } else if (p2Decision == "b2" and not isAllIn) {
                      if (amountToCall > 0) {
-                        double p2raise;
-                        double p2raiseAbsolute;
+                        float p2raise;
+                        float p2raiseAbsolute;
                         p2raiseAbsolute = validRaiseSizes[1];
                         p2raise = p2raiseAbsolute - totalBetAmountP2;
                         totalBetAmountP2 = totalBetAmountP2 + p2raise;
@@ -2192,27 +2321,27 @@ class Dealer {
                         players[1].stack = players[1].stack - p2raise;
                         pot = pot + p2raise;
                         amountToCall = p2raise - amountToCall;
-                        if (((players[0].stack <= 1e-10) and (players[0].stack >= -1e-10)) or ((players[1].stack <= 1e-10) and (players[1].stack >= -1e-10))) {
+                        if (((players[0].stack <= 1e-4) and (players[0].stack >= -1e-4)) or ((players[1].stack <= 1e-4) and (players[1].stack >= -1e-4))) {
                            isAllIn = true;
                         }
                         break;
                      } else {
-                        double p2bet;
+                        float p2bet;
                         p2bet = validBetSizes[1];
                         totalBetAmountP2 = totalBetAmountP2 + p2bet;
                         std::cout << "Player 2 bet " << p2bet << std::endl << std::endl;
                         players[1].stack = players[1].stack - p2bet;
                         pot = pot + p2bet;
                         amountToCall = p2bet;
-                        if (((players[0].stack <= 1e-10) and (players[0].stack >= -1e-10)) or ((players[1].stack <= 1e-10) and (players[1].stack >= -1e-10))) {
+                        if (((players[0].stack <= 1e-4) and (players[0].stack >= -1e-4)) or ((players[1].stack <= 1e-4) and (players[1].stack >= -1e-4))) {
                            isAllIn = true;
                         }
                         break;
                      }
                   } else if (p2Decision == "b3" and not isAllIn) {
                      if (amountToCall > 0) {
-                        double p2raise;
-                        double p2raiseAbsolute;
+                        float p2raise;
+                        float p2raiseAbsolute;
                         p2raiseAbsolute = validRaiseSizes[2];
                         p2raise = p2raiseAbsolute - totalBetAmountP2;
                         totalBetAmountP2 = totalBetAmountP2 + p2raise;
@@ -2220,19 +2349,19 @@ class Dealer {
                         players[1].stack = players[1].stack - p2raise;
                         pot = pot + p2raise;
                         amountToCall = p2raise - amountToCall;
-                        if (((players[0].stack <= 1e-10) and (players[0].stack >= -1e-10)) or ((players[1].stack <= 1e-10) and (players[1].stack >= -1e-10))) {
+                        if (((players[0].stack <= 1e-4) and (players[0].stack >= -1e-4)) or ((players[1].stack <= 1e-4) and (players[1].stack >= -1e-4))) {
                            isAllIn = true;
                         }
                         break;
                      } else {
-                        double p2bet;
+                        float p2bet;
                         p2bet = validBetSizes[2];
                         totalBetAmountP2 = totalBetAmountP2 + p2bet;
                         std::cout << "Player 2 bet " << p2bet << std::endl << std::endl;
                         players[1].stack = players[1].stack - p2bet;
                         pot = pot + p2bet;
                         amountToCall = p2bet;
-                        if (((players[0].stack <= 1e-10) and (players[0].stack >= -1e-10)) or ((players[1].stack <= 1e-10) and (players[1].stack >= -1e-10))) {
+                        if (((players[0].stack <= 1e-4) and (players[0].stack >= -1e-4)) or ((players[1].stack <= 1e-4) and (players[1].stack >= -1e-4))) {
                            isAllIn = true;
                         }
                         break;
@@ -2245,7 +2374,7 @@ class Dealer {
                   break;
                }
                while (true) {
-                  if (((players[0].stack - amountToCall <= 1e-10) and (players[0].stack - amountToCall >= -1e-10)) or ((players[1].stack - amountToCall <= 1e-10) and (players[1].stack - amountToCall >= -1e-10))) {
+                  if (((players[0].stack - amountToCall <= 1e-4) and (players[0].stack - amountToCall >= -1e-4)) or ((players[1].stack - amountToCall <= 1e-4) and (players[1].stack - amountToCall >= -1e-4))) {
                      isAllIn = true;
                   }
                   std::cout << "------------------------" << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl;
@@ -2256,8 +2385,8 @@ class Dealer {
                   std::cout << std::endl;
                   showStacks();
                   std::cout << std::endl;
-                  std::vector<double> validBetSizes = {pot * betSizes[0], pot * betSizes[1], pot * betSizes[2]};
-                  std::vector<double> validRaiseSizes = {totalBetAmountP2 * raiseSizes[0], totalBetAmountP2 * raiseSizes[1], totalBetAmountP2 * raiseSizes[2]};
+                  std::vector<float> validBetSizes = {pot * betSizes[0], pot * betSizes[1], pot * betSizes[2]};
+                  std::vector<float> validRaiseSizes = {totalBetAmountP2 * raiseSizes[0], totalBetAmountP2 * raiseSizes[1], totalBetAmountP2 * raiseSizes[2]};
                   validBetSizes = getValidFixedSizes(validBetSizes, bigBlind, p1StartingStack, p2StartingStack);
                   validRaiseSizes = getValidFixedSizes(validRaiseSizes, amountToCall + totalBetAmountP2, p1StartingStack, p2StartingStack);
                   std::string p1Decision;
@@ -2287,8 +2416,8 @@ class Dealer {
                      }
                   } else if (p1Decision == "b1" and not isAllIn) {
                      if (amountToCall > 0) {
-                        double p1raise;
-                        double p1raiseAbsolute;
+                        float p1raise;
+                        float p1raiseAbsolute;
                         p1raiseAbsolute = validRaiseSizes[0];
                         p1raise = p1raiseAbsolute - totalBetAmountP1;
                         totalBetAmountP1 = totalBetAmountP1 + p1raise;
@@ -2296,27 +2425,27 @@ class Dealer {
                         players[0].stack = players[0].stack - p1raise;
                         pot = pot + p1raise;
                         amountToCall = p1raise - amountToCall;
-                        if (((players[0].stack <= 1e-10) and (players[0].stack >= -1e-10)) or ((players[1].stack <= 1e-10) and (players[1].stack >= -1e-10))) {
+                        if (((players[0].stack <= 1e-4) and (players[0].stack >= -1e-4)) or ((players[1].stack <= 1e-4) and (players[1].stack >= -1e-4))) {
                            isAllIn = true;
                         }
                         break;
                      } else {
-                        double p1bet;
+                        float p1bet;
                         p1bet = validBetSizes[0];
                         totalBetAmountP1 = totalBetAmountP1 + p1bet;
                         std::cout << "Player 1 bet " << p1bet << std::endl << std::endl;
                         players[0].stack = players[0].stack - p1bet;
                         pot = pot + p1bet;
                         amountToCall = p1bet;
-                        if (((players[0].stack <= 1e-10) and (players[0].stack >= -1e-10)) or ((players[1].stack <= 1e-10) and (players[1].stack >= -1e-10))) {
+                        if (((players[0].stack <= 1e-4) and (players[0].stack >= -1e-4)) or ((players[1].stack <= 1e-4) and (players[1].stack >= -1e-4))) {
                            isAllIn = true;
                         }
                         break;
                      }
                   } else if (p1Decision == "b2" and not isAllIn) {
                      if (amountToCall > 0) {
-                        double p1raise;
-                        double p1raiseAbsolute;
+                        float p1raise;
+                        float p1raiseAbsolute;
                         p1raiseAbsolute = validRaiseSizes[1];
                         p1raise = p1raiseAbsolute - totalBetAmountP1;
                         totalBetAmountP1 = totalBetAmountP1 + p1raise;
@@ -2324,27 +2453,27 @@ class Dealer {
                         players[0].stack = players[0].stack - p1raise;
                         pot = pot + p1raise;
                         amountToCall = p1raise - amountToCall;
-                        if (((players[0].stack <= 1e-10) and (players[0].stack >= -1e-10)) or ((players[1].stack <= 1e-10) and (players[1].stack >= -1e-10))) {
+                        if (((players[0].stack <= 1e-4) and (players[0].stack >= -1e-4)) or ((players[1].stack <= 1e-4) and (players[1].stack >= -1e-4))) {
                            isAllIn = true;
                         }
                         break;
                      } else {
-                        double p1bet;
+                        float p1bet;
                         p1bet = validBetSizes[1];
                         totalBetAmountP1 = totalBetAmountP1 + p1bet;
                         std::cout << "Player 1 bet " << p1bet << std::endl << std::endl;
                         players[0].stack = players[0].stack - p1bet;
                         pot = pot + p1bet;
                         amountToCall = p1bet;
-                        if (((players[0].stack <= 1e-10) and (players[0].stack >= -1e-10)) or ((players[1].stack <= 1e-10) and (players[1].stack >= -1e-10))) {
+                        if (((players[0].stack <= 1e-4) and (players[0].stack >= -1e-4)) or ((players[1].stack <= 1e-4) and (players[1].stack >= -1e-4))) {
                            isAllIn = true;
                         }
                         break;
                      }
                   } else if (p1Decision == "b3" and not isAllIn) {
                      if (amountToCall > 0) {
-                        double p1raise;
-                        double p1raiseAbsolute;
+                        float p1raise;
+                        float p1raiseAbsolute;
                         p1raiseAbsolute = validRaiseSizes[2];
                         p1raise = p1raiseAbsolute - totalBetAmountP1;
                         totalBetAmountP1 = totalBetAmountP1 + p1raise;
@@ -2352,19 +2481,19 @@ class Dealer {
                         players[0].stack = players[0].stack - p1raise;
                         pot = pot + p1raise;
                         amountToCall = p1raise - amountToCall;
-                        if (((players[0].stack <= 1e-10) and (players[0].stack >= -1e-10)) or ((players[1].stack <= 1e-10) and (players[1].stack >= -1e-10))) {
+                        if (((players[0].stack <= 1e-4) and (players[0].stack >= -1e-4)) or ((players[1].stack <= 1e-4) and (players[1].stack >= -1e-4))) {
                            isAllIn = true;
                         }
                         break;
                      } else {
-                        double p1bet;
+                        float p1bet;
                         p1bet = validBetSizes[2];
                         totalBetAmountP1 = totalBetAmountP1 + p1bet;
                         std::cout << "Player 1 bet " << p1bet << std::endl << std::endl;
                         players[0].stack = players[0].stack - p1bet;
                         pot = pot + p1bet;
                         amountToCall = p1bet;
-                        if (((players[0].stack <= 1e-10) and (players[0].stack >= -1e-10)) or ((players[1].stack <= 1e-10) and (players[1].stack >= -1e-10))) {
+                        if (((players[0].stack <= 1e-4) and (players[0].stack >= -1e-4)) or ((players[1].stack <= 1e-4) and (players[1].stack >= -1e-4))) {
                            isAllIn = true;
                         }
                         break;
@@ -2382,12 +2511,12 @@ class Dealer {
          }
       }
 
-      void declareWinner(int checkWin, double winProb, bool isPostFlop) {
+      void declareWinner(int checkWin, float winProb, bool isPostFlop) {
          std::cout << "------------------------" << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl;
          if (checkWin == 1) {
             if (players[0].check72Rule() and isPostFlop and play72Rule) {
-               double bounty = bounty72Rule * bigBlind;
-               if (bounty >= players[1].stack + 1e-10) {
+               float bounty = bounty72Rule * bigBlind;
+               if (bounty >= players[1].stack + 1e-4) {
                   bounty = players[1].stack;
                }
                std::cout << "Player 1 wins the hand with 72o! Player 1 collects a bounty of " << bounty << " from Player 2!" << std::endl << std::endl;
@@ -2405,8 +2534,8 @@ class Dealer {
             }
          } else if (checkWin == 2) {
             if (players[1].check72Rule() and isPostFlop and play72Rule) {
-               double bounty = bounty72Rule * bigBlind;
-               if (bounty >= players[0].stack + 1e-10) {
+               float bounty = bounty72Rule * bigBlind;
+               if (bounty >= players[0].stack + 1e-4) {
                   bounty = players[0].stack;
                }
                std::cout << "Player 2 wins the hand with 72o! Player 2 collects a bounty of " << bounty << " from Player 1!" << std::endl << std::endl;
@@ -2425,8 +2554,8 @@ class Dealer {
          } else {
             if (winProb == 1.0) {
                if (players[0].check72Rule() and isPostFlop and play72Rule) {
-                  double bounty = bounty72Rule * bigBlind;
-                  if (bounty >= players[1].stack + 1e-10) {
+                  float bounty = bounty72Rule * bigBlind;
+                  if (bounty >= players[1].stack + 1e-4) {
                      bounty = players[1].stack;
                   }
                   std::cout << "Player 1 wins the hand with 72o! Player 1 collects a bounty of " << bounty << " from Player 2!" << std::endl << std::endl;
@@ -2444,8 +2573,8 @@ class Dealer {
                }
             } else if (winProb == 0.0) {
                if (players[1].check72Rule() and isPostFlop and play72Rule) {
-                  double bounty = bounty72Rule * bigBlind;
-                  if (bounty >= players[0].stack + 1e-10) {
+                  float bounty = bounty72Rule * bigBlind;
+                  if (bounty >= players[0].stack + 1e-4) {
                      bounty = players[0].stack;
                   }
                   std::cout << "Player 2 wins the hand with 72o! Player 2 collects a bounty of " << bounty << " from Player 1!" << std::endl << std::endl;
@@ -2628,8 +2757,8 @@ class Dealer {
          p1Button = not p1Button;
       }
 
-      std::vector<double> rankHands() {
-         std::vector<double> playerWins;
+      std::vector<float> rankHands() {
+         std::vector<float> playerWins;
          for (int i=0; i<numPlayers; i++) {
             playerWins.push_back(0);
          }
@@ -2650,7 +2779,7 @@ class Dealer {
                winners.push_back(i);
             }
          }
-         double size = (double)winners.size();
+         float size = (float)winners.size();
          for (int i=0; i<size; i++) {
             playerWins[winners[i]] += 1 / size;
          }
@@ -2661,7 +2790,7 @@ class Dealer {
 class Node {
    public:
       std::vector<int> cards;
-      double winProb;
+      float winProb;
       std::vector<Node*> children;
 
       Node(std::vector<int> inputCards) : cards(inputCards) {}

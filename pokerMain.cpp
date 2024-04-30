@@ -10,16 +10,16 @@ int main(int argc, char* argv[]) {
    const int numThreads = std::atoi(argv[1]);
 
    bool play72Rule = false; //true means 72 rule is turned on, false means it is turned off
-   double bounty72Rule = 10.0; //bounty in big blinds for winning a hand with 72o
+   float bounty72Rule = 10.0; //bounty in big blinds for winning a hand with 72o
 
-   double p1StartingStack = 100.0;
-   double p2StartingStack = 100.0;
+   float p1StartingStack = 100.0;
+   float p2StartingStack = 100.0;
 
-   double smallBlind = 0.5;
-   double bigBlind = 1.0;
+   float smallBlind = 0.5;
+   float bigBlind = 1.0;
 
-   const double raiseSizes[] = {2.0, 3.0, 5.0}; //relative to opponent's bet/raise size
-   const double betSizes[] = {0.33, 0.75, 1.3}; //relative to the pot
+   const float raiseSizes[] = {2.0, 3.0, 5.0}; //relative to opponent's bet/raise size
+   const float betSizes[] = {0.33, 0.75, 1.3}; //relative to the pot
 
    Dealer dealer(p1StartingStack, p2StartingStack, smallBlind, bigBlind, play72Rule, bounty72Rule);
    bool playAgain = true;
@@ -71,11 +71,11 @@ int main(int argc, char* argv[]) {
          Node* riverNode = findRiverBoard(turnNode, dealer.board[4]);
          std::cout << "Player 1's river win percentage is: " << riverNode->winProb * 100 << "%" << std::endl << std::endl;
          
-         double p1winProb = riverNode->winProb;
+         float p1winProb = riverNode->winProb;
          
          #else
-         std::vector<double> winners = dealer.rankHands();
-         double p1winProb;
+         std::vector<float> winners = dealer.rankHands();
+         float p1winProb;
          if (winners[0] > winners[1]) {
             p1winProb = 1.0;
          } else if (winners[0] < winners[1]) {
@@ -124,11 +124,11 @@ int main(int argc, char* argv[]) {
             Node* riverNode = findRiverBoard(turnNode, dealer.board[4]);
             std::cout << "Player 1's river win percentage is: " << riverNode->winProb * 100 << "%" << std::endl << std::endl;
 
-            double p1winProb = riverNode->winProb;
+            float p1winProb = riverNode->winProb;
             
             #else
-            std::vector<double> winners = dealer.rankHands();
-            double p1winProb;
+            std::vector<float> winners = dealer.rankHands();
+            float p1winProb;
             if (winners[0] > winners[1]) {
                p1winProb = 1.0;
             } else if (winners[0] < winners[1]) {
@@ -169,11 +169,11 @@ int main(int argc, char* argv[]) {
                Node* riverNode = findRiverBoard(turnNode, dealer.board[4]);
                std::cout << "Player 1's river win percentage is: " << riverNode->winProb * 100 << "%" << std::endl << std::endl;
                
-               double p1winProb = riverNode->winProb;
+               float p1winProb = riverNode->winProb;
          
                #else
-               std::vector<double> winners = dealer.rankHands();
-               double p1winProb;
+               std::vector<float> winners = dealer.rankHands();
+               float p1winProb;
                if (winners[0] > winners[1]) {
                   p1winProb = 1.0;
                } else if (winners[0] < winners[1]) {
@@ -206,11 +206,11 @@ int main(int argc, char* argv[]) {
                #endif
 
                #ifdef PROBABILITY
-               double p1winProb = riverNode->winProb;
+               float p1winProb = riverNode->winProb;
 
                #else
-               std::vector<double> winners = dealer.rankHands();
-               double p1winProb;
+               std::vector<float> winners = dealer.rankHands();
+               float p1winProb;
                if (winners[0] > winners[1]) {
                   p1winProb = 1.0;
                } else if (winners[0] < winners[1]) {
@@ -233,11 +233,11 @@ int main(int argc, char* argv[]) {
          #endif
       }
 
-      if (dealer.players[0].stack <= 1e-10) {
+      if (dealer.players[0].stack <= 1e-4) {
          std::cout << "Player 2 wins the game! Thanks for playing!" << std::endl << std::endl;
          playAgain = false;
          break;
-      } else if (dealer.players[1].stack <= 1e-10) {
+      } else if (dealer.players[1].stack <= 1e-4) {
          std::cout << "Player 1 wins the game! Thanks for playing!" << std::endl << std::endl;
          playAgain = false;
          break;
@@ -266,3 +266,15 @@ int main(int argc, char* argv[]) {
 }
 
 //calculate stats like VPIP, pot odds, implied odds, PFR, cbet%, etc. to the HUD
+
+//be able to give each player a specific hand at the start of a betting round (removing those cards from the deck)
+
+//create different bet sizings depending on which betting street we are on and what position we are in (IP or OOP)
+//redo raise size calculation as a percentage of the pot
+
+//implement a hand range class (with range notation and mixed strategies)
+//be able to subtract and classify ranges (folding, calling, raising, etc.)
+//be able to compare ranges (nut advantage and equity advantage)
+
+//create a decision tree of all past actions and some future actions to a certain depth
+//create an evaluation function that determines if certain situations are more favorable than others (dependent on ranges and current hand)

@@ -6,13 +6,13 @@
 #include <mutex>
 #include <stack>
 #include <vector>
-#include <iostream>
 #include <random>
 #include <algorithm>
 #include <string>
 #include <fstream>
 #include <sstream>
 #include <unordered_map>
+#include <iomanip>
 
 class Deck {
    private:
@@ -123,135 +123,6 @@ class Deck {
             cards.push(temp.back());
             temp.pop_back();
          }
-      }
-};
-
-class Range {
-   public:
-      int triangleNumbers[12] = {0, 1, 3, 6, 10, 15, 21, 28, 36, 45, 55, 66};
-
-      float pairs[78] = {0.0};  //2D array of all pairs stored in row major ordering
-      //value orders: 2, 3, 4, 5, 6, 7, 8, 9, T, J, Q, K, A
-      //suit orders: cd, ch, cs, dh, ds, hs
-      float nonpairs[1248] = {0.0};  //3D triangular wedge shaped array of all nonpaired hands stored in row major ordering
-      //value orders: 2, 3, 4, 5, 6, 7, 8, 9, T, J, Q, K, A
-      //suit orders: cc, dd, hh, ss, cd, ch, cs, dc, dh, ds, hc, hd, hs, sc, sd, sh
-
-      void addHand(int card1, int card2, float weight) {
-         int suitIndex;
-         if (checkPair(card1, card2)) {
-            suitIndex = getPairSuitIndex(card1, card2);
-            int valueIndex = card1 / 4;
-            pairs[suitIndex * 13 + valueIndex] = weight;
-         }
-         suitIndex = getNonpairSuitIndex(card1, card2);
-         int valueIndex1 = std::min(card1 / 4, card2 / 4);
-         int valueIndex2 = std::max(card1 / 4, card2 / 4);
-         nonpairs[suitIndex * 78 + triangleNumbers[valueIndex1-1] + valueIndex2] = weight;
-      }
-
-      void addHand(int card1, int card2, float weight) {
-         int suitIndex;
-         if (checkPair(card1, card2)) {
-            suitIndex = getPairSuitIndex(card1, card2);
-            int valueIndex = card1 / 4;
-            pairs[suitIndex * 13 + valueIndex] = weight;
-         }
-         suitIndex = getNonpairSuitIndex(card1, card2);
-         int valueIndex1 = std::min(card1 / 4, card2 / 4);
-         int valueIndex2 = std::max(card1 / 4, card2 / 4);
-         nonpairs[suitIndex * 78 + triangleNumbers[valueIndex1-1] + valueIndex2] = weight;
-      }
-
-      void removeHand(int card1, int card2) {
-         int suitIndex;
-         if (checkPair(card1, card2)) {
-            suitIndex = getPairSuitIndex(card1, card2);
-            int valueIndex = card1 / 4;
-            pairs[suitIndex * 13 + valueIndex] = 0.0;
-         }
-         suitIndex = getNonpairSuitIndex(card1, card2);
-         int valueIndex1 = std::max(card1 / 4, card2 / 4);
-         int valueIndex2 = std::min(card1 / 4, card2 / 4);
-         nonpairs[suitIndex * 78 + triangleNumbers[valueIndex1-1] + valueIndex2] = 0.0;
-      }
-
-      float viewHand(int card1, int card2) {
-         int suitIndex;
-         if (checkPair(card1, card2)) {
-            suitIndex = getPairSuitIndex(card1, card2);
-            int valueIndex = card1 / 4;
-            return pairs[suitIndex * 13 + valueIndex];
-         }
-         suitIndex = getNonpairSuitIndex(card1, card2);
-         int valueIndex1 = std::max(card1 / 4, card2 / 4);
-         int valueIndex2 = std::min(card1 / 4, card2 / 4);
-         return nonpairs[suitIndex * 78 + triangleNumbers[valueIndex1-1] + valueIndex2];
-      }
-
-      bool isInRange(int card1, int card2) {
-         int suitIndex;
-         if (checkPair(card1, card2)) {
-            suitIndex = getPairSuitIndex(card1, card2);
-            int valueIndex = card1 / 4;
-            if (pairs[suitIndex * 13 + valueIndex] > 0.0) {return true;}
-            return false;
-         }
-         suitIndex = getNonpairSuitIndex(card1, card2);
-         int valueIndex1 = std::max(card1 / 4, card2 / 4);
-         int valueIndex2 = std::min(card1 / 4, card2 / 4);
-         if (nonpairs[suitIndex * 78 + triangleNumbers[valueIndex1-1] + valueIndex2] > 0.0) {return true;}
-         return false;
-      }
-
-      bool checkPair(int card1, int card2) {
-         if (card1 / 4 == card2 / 4) {return true;}
-         return false;
-      }
-
-      int getPairSuitIndex(int card1, int card2) {
-         int suit1 = card1 % 4;
-         int suit2 = card2 % 4;
-
-         if ((suit1 == 0 or suit1 == 1) and suit2 == 0 or suit2 == 1) {return 0;}
-         if ((suit1 == 0 or suit1 == 2) and suit2 == 0 or suit2 == 2) {return 1;}
-         if ((suit1 == 0 or suit1 == 3) and suit2 == 0 or suit2 == 3) {return 2;}
-         if ((suit1 == 1 or suit1 == 2) and suit2 == 1 or suit2 == 2) {return 3;}
-         if ((suit1 == 1 or suit1 == 3) and suit2 == 1 or suit2 == 3) {return 4;}
-         if ((suit1 == 2 or suit1 == 3) and suit2 == 2 or suit2 == 3) {return 5;}
-
-         std::cout << "Cannot find suit index for paired hand" << std::endl;
-         return 6;
-      }
-
-      int getNonpairSuitIndex(int card1, int card2) {
-         int suit1 = card1 % 4;
-         int suit2 = card2 % 4;
-
-         if (suit1 == suit2) {return suit1;}
-
-         if (suit1 == 0) {
-            if (suit2 == 1) {return 4;}
-            if (suit2 == 2) {return 5;}
-            if (suit2 == 3) {return 6;}
-         }
-         if (suit1 == 1) {
-            if (suit2 == 0) {return 7;}
-            if (suit2 == 2) {return 8;}
-            if (suit2 == 3) {return 9;}
-         }
-         if (suit1 == 2) {
-            if (suit2 == 0) {return 10;}
-            if (suit2 == 1) {return 11;}
-            if (suit2 == 3) {return 12;}
-         }
-         if (suit2 == 3) {
-            if (suit2 == 0) {return 13;}
-            if (suit2 == 1) {return 14;}
-            if (suit2 == 2) {return 15;}
-         }
-         std::cout << "Cannot find suit index for nonpaired hand" << std::endl;
-         return 16;
       }
 };
 
@@ -2798,6 +2669,454 @@ class Node {
       void addChild(Node* child) {
          children.push_back(child);
       }
-}; 
+};
+
+class Range {
+   public:
+      char values[13] = {'2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A'};
+      char suits[4] = {'c', 'd', 'h', 's'};
+
+      int triangleNumbers[12] = {0, 1, 3, 6, 10, 15, 21, 28, 36, 45, 55, 66};
+
+      float pairs[78] = {0.0};  //2D array of all pairs stored in row major ordering
+      //value orders: 2, 3, 4, 5, 6, 7, 8, 9, T, J, Q, K, A
+      //suit orders: cd, ch, cs, dh, ds, hs
+      float nonpairs[1248] = {0.0};  //3D triangular wedge shaped array of all nonpaired hands stored in row major ordering
+      //value orders: 2, 3, 4, 5, 6, 7, 8, 9, T, J, Q, K, A
+      //suit orders: cc, dd, hh, ss, cd, ch, cs, dc, dh, ds, hc, hd, hs, sc, sd, sh
+
+      Range operator-(const Range& other) const {
+         Range newRange = Range();
+         for (int i=0; i<78; i++) {
+            if (pairs[i] < other.pairs[i]) {
+               newRange.pairs[i] = 0.0;
+            } else {
+               newRange.pairs[i] = pairs[i] - other.pairs[i];
+            }
+         }
+         for (int i=0; i<1248; i++) {
+            if (nonpairs[i] < other.nonpairs[i]) {
+               newRange.nonpairs[i] = 0.0;
+            } else {
+               newRange.nonpairs[i] = nonpairs[i] - other.nonpairs[i];
+            }
+         }
+         return newRange;
+      }
+
+      Range operator+(const Range& other) const {
+         Range newRange = Range();
+         for (int i=0; i<78; i++) {
+            if (pairs[i] + other.pairs[i] > 1) {
+               newRange.pairs[i] = 1.0;
+            } else {
+               newRange.pairs[i] = pairs[i] + other.pairs[i];
+            }
+         }
+         for (int i=0; i<1248; i++) {
+            if (nonpairs[i] + other.nonpairs[i] > 1) {
+               newRange.nonpairs[i] = 1.0;
+            } else {
+               newRange.nonpairs[i] = nonpairs[i] + other.nonpairs[i];
+            }
+         }
+         return newRange;
+      }
+
+      void add(int card1, int card2, float weight) {
+         int suitIndex;
+         if (checkPair(card1, card2)) {
+            suitIndex = getPairSuitIndex(card1, card2);
+            int valueIndex = card1 / 4;
+            pairs[suitIndex * 13 + valueIndex] = weight;
+         } else {
+            suitIndex = getNonpairSuitIndex(card1, card2);
+            int valueIndex1 = std::max(card1 / 4, card2 / 4);
+            int valueIndex2 = std::min(card1 / 4, card2 / 4);
+            nonpairs[suitIndex * 78 + triangleNumbers[valueIndex1-1] + valueIndex2] = weight;
+         }
+      }
+
+      void remove(int card1, int card2) {
+         int suitIndex;
+         if (checkPair(card1, card2)) {
+            suitIndex = getPairSuitIndex(card1, card2);
+            int valueIndex = card1 / 4;
+            pairs[suitIndex * 13 + valueIndex] = 0.0;
+         } else {
+            suitIndex = getNonpairSuitIndex(card1, card2);
+            int valueIndex1 = std::max(card1 / 4, card2 / 4);
+            int valueIndex2 = std::min(card1 / 4, card2 / 4);
+            nonpairs[suitIndex * 78 + triangleNumbers[valueIndex1-1] + valueIndex2] = 0.0;
+         }
+      }
+
+      float getWeight(int card1, int card2) {
+         int suitIndex;
+         if (checkPair(card1, card2)) {
+            suitIndex = getPairSuitIndex(card1, card2);
+            int valueIndex = card1 / 4;
+            return pairs[suitIndex * 13 + valueIndex];
+         }
+         suitIndex = getNonpairSuitIndex(card1, card2);
+         int valueIndex1 = std::max(card1 / 4, card2 / 4);
+         int valueIndex2 = std::min(card1 / 4, card2 / 4);
+         return nonpairs[suitIndex * 78 + triangleNumbers[valueIndex1-1] + valueIndex2];
+      }
+
+      bool isInRange(int card1, int card2) {
+         int suitIndex;
+         if (checkPair(card1, card2)) {
+            suitIndex = getPairSuitIndex(card1, card2);
+            int valueIndex = card1 / 4;
+            if (pairs[suitIndex * 13 + valueIndex] > 0.0) {return true;}
+            return false;
+         }
+         suitIndex = getNonpairSuitIndex(card1, card2);
+         int valueIndex1 = std::max(card1 / 4, card2 / 4);
+         int valueIndex2 = std::min(card1 / 4, card2 / 4);
+         if (nonpairs[suitIndex * 78 + triangleNumbers[valueIndex1-1] + valueIndex2] > 0.0) {return true;}
+         return false;
+      }
+
+      bool checkPair(int card1, int card2) {
+         if (card1 / 4 == card2 / 4) {return true;}
+         return false;
+      }
+
+      int getPairSuitIndex(int card1, int card2) {
+         int suit1 = card1 % 4;
+         int suit2 = card2 % 4;
+
+         if ((suit1 == 0 or suit1 == 1) and (suit2 == 0 or suit2 == 1)) {return 0;}
+         if ((suit1 == 0 or suit1 == 2) and (suit2 == 0 or suit2 == 2)) {return 1;}
+         if ((suit1 == 0 or suit1 == 3) and (suit2 == 0 or suit2 == 3)) {return 2;}
+         if ((suit1 == 1 or suit1 == 2) and (suit2 == 1 or suit2 == 2)) {return 3;}
+         if ((suit1 == 1 or suit1 == 3) and (suit2 == 1 or suit2 == 3)) {return 4;}
+         if ((suit1 == 2 or suit1 == 3) and (suit2 == 2 or suit2 == 3)) {return 5;}
+
+         std::cout << "Cannot find suit index for paired hand" << std::endl;
+         return 6;
+      }
+
+      int getNonpairSuitIndex(int card1, int card2) {
+         int suit1 = card1 % 4;
+         int suit2 = card2 % 4;
+
+         if (suit1 == suit2) {return suit1;}
+
+         if (suit1 == 0) {
+            if (suit2 == 1) {return 4;}
+            if (suit2 == 2) {return 5;}
+            if (suit2 == 3) {return 6;}
+         }
+         if (suit1 == 1) {
+            if (suit2 == 0) {return 7;}
+            if (suit2 == 2) {return 8;}
+            if (suit2 == 3) {return 9;}
+         }
+         if (suit1 == 2) {
+            if (suit2 == 0) {return 10;}
+            if (suit2 == 1) {return 11;}
+            if (suit2 == 3) {return 12;}
+         }
+         if (suit1 == 3) {
+            if (suit2 == 0) {return 13;}
+            if (suit2 == 1) {return 14;}
+            if (suit2 == 2) {return 15;}
+         }
+         std::cout << "Cannot find suit index for nonpaired hand" << std::endl;
+         return 16;
+      }
+
+      void add(std::string hands, float weight) {
+         int value1;
+         int value2;
+         int value3;
+         int value4;
+         int valueIndex1;
+         int valueIndex2;
+         int valueIndex3;
+         int valueIndex4;
+
+         hands.erase(std::remove(hands.begin(), hands.end(), ' '), hands.end());
+
+         std::vector<std::string> tokens;
+         std::istringstream ss(hands);
+         std::string token;
+
+         while (getline(ss, token, ',')) {
+            tokens.push_back(token);
+         }
+
+         int numTokens = tokens.size();
+
+         for (int iter=0; iter<numTokens; iter++) {
+            int length = tokens[iter].length();
+            if (length < 2) {
+               std::cout << "Please enter a valid hand to add." << std::endl;
+            } else if (length == 2) {
+               for (int i=0; i<13; i++) {
+                  if (tokens[iter][0] == values[i]) {value1 = i;}
+                  if (tokens[iter][1] == values[i]) {value2 = i;}
+               }
+               if (value1 == value2) {
+                  for (int i=0; i<6; i++) {
+                     pairs[i * 13 + value1] = weight;
+                  }
+               } else {
+                  for (int i=0; i<16; i++) {
+                     valueIndex1 = std::max(value1, value2);
+                     valueIndex2 = std::min(value1, value2);
+                     nonpairs[i * 78 + triangleNumbers[valueIndex1-1] + valueIndex2] = weight;
+                  }
+               }
+            } else if (length == 3) {
+               for (int i=0; i<13; i++) {
+                  if (tokens[iter][0] == values[i]) {value1 = i;}
+                  if (tokens[iter][1] == values[i]) {value2 = i;}
+               }
+               valueIndex1 = std::max(value1, value2);
+               valueIndex2 = std::min(value1, value2);
+               if (value1 == value2 and tokens[iter][2] == '+') {
+                  for (int j=value1; j<13; j++) {
+                     for (int i=0; i<6; i++) {
+                        pairs[i * 13 + j] = weight;
+                     }
+                  }
+               } else if (value1 == value2) {
+                  std::cout << "Please enter a valid hand to add." << std::endl;
+               } else if (tokens[iter][2] == 's') {
+                  for (int i=0; i<4; i++) {
+                     nonpairs[i * 78 + triangleNumbers[valueIndex1-1] + valueIndex2] = weight;
+                  }
+               } else if (tokens[iter][2] == 'o') {
+                  for (int i=4; i<16; i++) {
+                     nonpairs[i * 78 + triangleNumbers[valueIndex1-1] + valueIndex2] = weight;
+                  }
+               } else if (tokens[iter][2] == '+') {
+                  for (int j=valueIndex2; j<valueIndex1; j++) {
+                     for (int i=0; i<16; i++) {
+                        nonpairs[i * 78 + triangleNumbers[valueIndex1-1] + j] = weight;
+                     }
+                  }
+               } else {
+                  std::cout << "Please enter a valid hand to add." << std::endl;
+               }
+            } else if (length == 4) {
+               for (int i=0; i<13; i++) {
+                  if (tokens[iter][0] == values[i]) {value1 = i;}
+                  if (tokens[iter][1] == values[i]) {value2 = i;}
+               }
+               valueIndex1 = std::max(value1, value2);
+               valueIndex2 = std::min(value1, value2);
+               if (valueIndex1 != valueIndex2 and tokens[iter][2] == 's' and tokens[iter][3] == '+') {
+                  if (valueIndex1 - valueIndex2 == 1) {
+                     for (int i=valueIndex1; i<13; i++) {
+                        for (int j=0; j<4; j++) {
+                           nonpairs[j * 78 + triangleNumbers[i-1] + i-1] = weight;
+                        }
+                     }
+                  } else {
+                     for (int j=valueIndex2; j<valueIndex1; j++) {
+                        for (int i=0; i<4; i++) {
+                           nonpairs[i * 78 + triangleNumbers[valueIndex1-1] + j] = weight;
+                        }
+                     }
+                  }
+               } else if (value1 != value2 and tokens[iter][2] == 'o' and tokens[iter][3] == '+') {
+                  if (valueIndex1 - valueIndex2 == 1) {
+                     for (int i=valueIndex1; i<13; i++) {
+                        for (int j=4; j<16; j++) {
+                           nonpairs[j * 78 + triangleNumbers[i-1] + i-1] = weight;
+                        }
+                     }
+                  } else {
+                     for (int j=valueIndex2; j<valueIndex1; j++) {
+                        for (int i=4; i<16; i++) {
+                           nonpairs[i * 78 + triangleNumbers[valueIndex1-1] + j] = weight;
+                        }
+                     }
+                  }
+               } else {
+                  std::cout << "Please enter a valid hand to add." << std::endl;
+               }
+            } else if (length == 5) {
+               for (int i=0; i<13; i++) {
+                  if (tokens[iter][0] == values[i]) {value1 = i;}
+                  if (tokens[iter][1] == values[i]) {value2 = i;}
+                  if (tokens[iter][3] == values[i]) {value3 = i;}
+                  if (tokens[iter][4] == values[i]) {value4 = i;}
+               }
+               valueIndex1 = std::max(value1, value2);
+               valueIndex2 = std::min(value1, value2);
+               valueIndex3 = std::max(value3, value4);
+               valueIndex4 = std::min(value3, value4);
+               if ((tokens[iter][2] != '-') or (valueIndex1 < valueIndex3) or (valueIndex1 == valueIndex3 and valueIndex2 <= valueIndex4)) {
+                  std::cout << "Please enter a valid hand to add." << std::endl;
+               } else if (valueIndex1 - valueIndex2 == valueIndex3 - valueIndex4) {
+                  if (valueIndex1 == valueIndex2) {
+                     for (int j=0; j<=valueIndex1-valueIndex3; j++) {
+                        for (int i=0; i<6; i++) {
+                           pairs[i * 13 + valueIndex3+j] = weight;
+                        }
+                     }
+                  } else if (valueIndex1 != valueIndex2) {
+                     if (valueIndex1 != valueIndex3) {
+                        for (int j=0; j<=valueIndex1-valueIndex3; j++) {
+                           for (int i=0; i<16; i++) {
+                              nonpairs[i * 78 + triangleNumbers[valueIndex3+j-1] + valueIndex4+j] = weight;
+                           }
+                        }
+                     } else {
+                        for (int j=0; j<=valueIndex2-valueIndex4; j++) {
+                           for (int i=0; i<16; i++) {
+                              nonpairs[i * 78 + triangleNumbers[valueIndex3-1] + valueIndex4+j] = weight;
+                           }
+                        }
+                     }
+                  }
+               } else if (valueIndex1 == valueIndex3 and valueIndex1 != valueIndex2) {
+                  for (int j=valueIndex4; j<=valueIndex2; j++) {
+                     for (int i=0; i<16; i++) {
+                        nonpairs[i * 78 + triangleNumbers[valueIndex1-1] + j] = weight;
+                     }
+                  }
+               } else {
+                  std::cout << "Please enter a valid hand to add." << std::endl;
+               }
+            } else if (length == 7) {
+               for (int i=0; i<13; i++) {
+                  if (tokens[iter][0] == values[i]) {value1 = i;}
+                  if (tokens[iter][1] == values[i]) {value2 = i;}
+                  if (tokens[iter][4] == values[i]) {value3 = i;}
+                  if (tokens[iter][5] == values[i]) {value4 = i;}
+               }
+               valueIndex1 = std::max(value1, value2);
+               valueIndex2 = std::min(value1, value2);
+               valueIndex3 = std::max(value3, value4);
+               valueIndex4 = std::min(value3, value4);
+               if (tokens[iter][3] != '-' or valueIndex1 < valueIndex3 or tokens[iter][2] != tokens[iter][6] or (not (tokens[iter][2] == 's' or tokens[iter][2] == 'o')) or valueIndex1 == valueIndex2) {
+                  std::cout << "Please enter a valid hand to add." << std::endl;
+               } else if (tokens[iter][2] == 's') {
+                  if (valueIndex1 - valueIndex2 == valueIndex3 - valueIndex4) {
+                     if (valueIndex1 != valueIndex3) {
+                        for (int j=0; j<=valueIndex1-valueIndex3; j++) {
+                           for (int i=0; i<4; i++) {
+                              nonpairs[i * 78 + triangleNumbers[valueIndex3+j-1] + valueIndex4+j] = weight;
+                           }
+                        }
+                     } else {
+                        for (int j=0; j<=valueIndex2-valueIndex4; j++) {
+                           for (int i=0; i<4; i++) {
+                              nonpairs[i * 78 + triangleNumbers[valueIndex3-1] + valueIndex4+j] = weight;
+                           }
+                        }
+                     }
+                  } else if (valueIndex1 == valueIndex3 and valueIndex2 != valueIndex4) {
+                     for (int j=valueIndex4; j<=valueIndex2; j++) {
+                        for (int i=0; i<4; i++) {
+                           nonpairs[i * 78 + triangleNumbers[valueIndex1-1] + j] = weight;
+                        }
+                     }
+                  } else {
+                     std::cout << "Please enter a valid hand to add." << std::endl;
+                  }
+               } else if (tokens[iter][2] == 'o') {
+                  if (valueIndex1 - valueIndex2 == valueIndex3 - valueIndex4) {
+                     if (valueIndex1 != valueIndex3) {
+                        for (int j=0; j<=valueIndex1-valueIndex3; j++) {
+                           for (int i=4; i<16; i++) {
+                              nonpairs[i * 78 + triangleNumbers[valueIndex3+j-1] + valueIndex4+j] = weight;
+                           }
+                        }
+                     } else {
+                        for (int j=0; j<=valueIndex2-valueIndex4; j++) {
+                           for (int i=4; i<16; i++) {
+                              nonpairs[i * 78 + triangleNumbers[valueIndex3-1] + valueIndex4+j] = weight;
+                           }
+                        }
+                     }
+                  } else if (valueIndex1 == valueIndex3 and valueIndex1 != valueIndex2) {
+                     for (int j=valueIndex4; j<=valueIndex2; j++) {
+                        for (int i=4; i<16; i++) {
+                           nonpairs[i * 78 + triangleNumbers[valueIndex1-1] + j] = weight;
+                        }
+                     }
+                  } else {
+                     std::cout << "Please enter a valid hand to add." << std::endl;
+                  }
+               } else {
+                  std::cout << "Please enter a valid hand to add." << std::endl;
+               }
+            } else {
+               std::cout << "Please enter a valid hand to add." << std::endl;
+            }
+         }
+      }
+
+      void print() {
+         float grid[169] = {0.0};
+         float offsuit = 0.0;
+         float suited = 0.0;
+
+         for (int i=0; i<13; i++) {  //add pairs
+            for (int j=0; j<6; j++) {
+               if (pairs[j * 13 + i] > 10e-4) {
+                  grid[i * 13 + i] += (1.0/6.0) * pairs[j * 13 + i];
+               }
+            }
+         }
+         for (int i=1; i<13; i++) {  //add nonpairs
+            for (int j=0; j<i; j++) {
+               offsuit = 0.0;
+               suited = 0.0;
+               for (int k=0; k<16; k++) {
+                  if (nonpairs[k * 78 + triangleNumbers[i-1] + j] > 10e-4) {
+                     if (k<4) {
+                        suited += nonpairs[k * 78 + triangleNumbers[i-1] + j];
+                     } else {
+                        offsuit += nonpairs[k * 78 + triangleNumbers[i-1] + j];
+                     }
+                  }
+               }
+               grid[j * 13 + i] += offsuit / 12.0;
+               grid[i * 13 + j] += suited / 4.0;
+            }
+         }
+         std::cout << "   " << values[12] << "    " << values[11] << "    "  << values[10] << "    "  << values[9] << "    "  << values[8] << "    "  << values[7] << "    "  << values[6] << "    "  << values[5] << "    "  << values[4] << "    "  << values[3] << "    "  << values[2] << "    "  << values[1] << "    "  << values[0] << std::endl;
+         for (int i=12; i>=0; i--) {  //display hand chart grid
+            std::cout << values[i] << " ";
+            for (int j=12; j>=0; j--) {
+               std::cout << std::fixed << std::setprecision(2) << grid[i * 13 + j] << " ";
+            }
+            std::cout << std::endl;
+         }
+         std::cout << std::endl;
+      }
+
+      std::string getCard(int card) {
+         std::string value = std::string(1, values[card / 4]);
+         std::string suit = std::string(1, suits[card % 4]);
+         return value + suit;
+      }
+
+      int getInt(std::string card) {
+         char value = card[0];
+         char suit = card[1];
+         int ans = 0;
+         for (int i=0; i<13; i++) {
+            if (value == values[i]) {
+               ans = i * 4;
+            }
+         }
+         for (int i=0; i<4; i++) {
+            if (suit == suits[i]) {
+               ans += i;
+            }
+         }
+         return ans;
+      }
+};
 
 #endif

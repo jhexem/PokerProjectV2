@@ -267,12 +267,13 @@ int main(int argc, char* argv[]) {
 
 //calculate stats like VPIP, pot odds, implied odds, PFR, cbet%, etc. to the HUD
 
-//be able to give each player a specific hand at the start of a betting round (removing those cards from the deck)
+//give each player a specific hand at the start of a betting round (removing those cards from the deck)
+//simulate range vs range equity
 
 //create different bet sizings depending on which betting street we are on and what position we are in (IP or OOP)
 //redo raise size calculation as a percentage of the pot
 
-//implement a hand range class (with range notation and mixed strategies)
+//make sure that I cannot add the same hand to the range twice
 //be able to subtract and classify ranges (folding, calling, raising, etc.)
 //be able to compare ranges (nut advantage and equity advantage)
 

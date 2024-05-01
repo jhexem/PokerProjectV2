@@ -68,6 +68,8 @@
       "utility": "cpp",
       "numbers": "cpp",
       "stop_token": "cpp",
-      "thread": "cpp"
+      "thread": "cpp",
+      "span": "cpp",
+      "format": "cpp"
    }
 }

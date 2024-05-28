@@ -93,6 +93,50 @@ class Deck {
          return value + suit;
       }
 
+      void remove(std::vector<std::string> rmCardsStrs) {
+         std::vector<int> rmCards;
+         int numRmCards = rmCardsStrs.size();
+         for (int i=0; i<numRmCards; i++) {
+            rmCards.push_back(getInt(rmCardsStrs[i]));
+         }
+         std::vector<int> temp;
+         while (!cards.empty()) {
+            bool isMatch = false;
+            for (int i=0; i<numRmCards; i++) {
+               if (cards.top() == rmCards[i]) {isMatch = true;}
+            }
+            if (!isMatch) {
+               temp.push_back(cards.top());
+               cards.pop();
+            }
+         }
+         while (!temp.empty()) {
+            cards.push(temp.back());
+            temp.pop_back();
+         }
+         shuffle();
+      }
+
+      void remove(std::vector<int> rmCards) {
+         std::vector<int> temp;
+         int numRmCards = rmCards.size();
+         while (!cards.empty()) {
+            bool isMatch = false;
+            for (int i=0; i<numRmCards; i++) {
+               if (cards.top() == rmCards[i]) {isMatch = true;}
+            }
+            if (!isMatch) {
+               temp.push_back(cards.top());
+               cards.pop();
+            }
+         }
+         while (!temp.empty()) {
+            cards.push(temp.back());
+            temp.pop_back();
+         }
+         shuffle();
+      }
+
       int getInt(std::string card) {
          char value = card[0];
          char suit = card[1];
@@ -348,6 +392,31 @@ class Player {
          }
          return minRank;
       }
+
+      int getPlayerHandType() {
+         int rank = rankPlayerHand();
+         if (rank == 1) {
+            return 9;  //royal flush
+         } else if (rank > 1 && rank <= 10) {
+            return 8;  //straight flush
+         } else if (rank > 10 && rank <= 166) {
+            return 7;  //four of a kind
+         } else if (rank > 166 && rank <= 322) {
+            return 6;  //full house
+         } else if (rank > 322 && rank <= 1599) {
+            return 5;  //flush
+         } else if (rank > 1599 && rank <= 1609) {
+            return 4;  //straight
+         } else if (rank > 1609 && rank <= 2467) {
+            return 3;  //three of a kind
+         } else if (rank > 2467 && rank <= 3325) {
+            return 2;  //two pair
+         } else if (rank > 3325 && rank <= 6185) {
+            return 1;  //pair
+         } else {
+            return 0;  //high card
+         }
+      }
 };
 
 class Dealer {
@@ -432,6 +501,17 @@ class Dealer {
          bounty72Rule = bounty72;
       }
 
+      Dealer() {
+         numPlayers = 2;
+         Deck deck;
+         std::vector<Player> newPlayers;
+         Player player1(1, 0.0);
+         newPlayers.push_back(player1);
+         Player player2(2, 0.0);
+         newPlayers.push_back(player2);
+         players = newPlayers;
+      }
+
       int getInt(std::string card) {
          char value = card[0];
          char suit = card[1];
@@ -463,6 +543,28 @@ class Dealer {
             players[i].takeCard(newCard2);
             deadCards.push_back(newCard1);
             deadCards.push_back(newCard2);
+         }
+      }
+
+      void dealHands(std::vector<std::string> hands) {
+         if (hands.size() != 4) {std::cout << "Invalid number of cards for player hands." << std::endl;}
+         else {
+            deck.remove(hands);
+            players[0].takeCard(getInt(hands[0]));
+            players[0].takeCard(getInt(hands[1]));
+            players[1].takeCard(getInt(hands[2]));
+            players[1].takeCard(getInt(hands[3]));
+         }
+      }
+
+      void dealHands(std::vector<int> hands) {
+         if (hands.size() != 4) {std::cout << "Invalid number of cards for player hands." << std::endl;}
+         else {
+            deck.remove(hands);
+            players[0].takeCard(hands[0]);
+            players[0].takeCard(hands[1]);
+            players[1].takeCard(hands[2]);
+            players[1].takeCard(hands[3]);
          }
       }
 
@@ -533,7 +635,7 @@ class Dealer {
       std::string getAllInPlayerDecision(Player player) {
          std::string decision;
          std::cout << "Player " << player.name << " please make your decision (f = fold, c = call): ";
-         std::cin >> decision;
+         std::getline(std::cin, decision);
          std::cout << std::endl;
          return decision;
       }
@@ -1363,6 +1465,15 @@ class Dealer {
 
       int startFixedPreFlopBettingRound(const float* betSizes, const float* raiseSizes) {
          std::vector<std::string> playerHands = getAllHands();
+         std::ostringstream oss;
+         oss << "Player 1 has " << playerHands[0] << " " << playerHands[1] << std::endl << "Player 2 has " << playerHands[2] << " " << playerHands[3] << std::endl << "Player 1 stack is " << std::fixed << std::setprecision(2) << players[0].stack << std::endl << "Player 2 stack is " << std::fixed << std::setprecision(2) << players[1].stack << std::endl;
+         std::string data = oss.str();
+         std::ofstream outFile("gameLogs.txt", std::ios::app);
+         if (!outFile) {
+            std::cerr << "Error opening file for writing!" << std::endl;
+         }
+         outFile << data;
+         outFile.close();
 
          int checkWin; //If checkWin = player.name, then that player won. If checkWin = 0, then both players matched each other's bet. If checkWin = -1 then one or both players are all in.
          float amountToCall = 0.0;
@@ -1443,14 +1554,41 @@ class Dealer {
                      p1Decision = getFixedPlayerDecision(players[0], validBetSizes, validRaiseSizes, false);
                   }
                   if (p1Decision == "f") {
+                     std::ostringstream oss;
+                     oss << "Player 1 folded" << std::endl;
+                     std::string data = oss.str();
+                     std::ofstream outFile("gameLogs.txt", std::ios::app);
+                     if (!outFile) {
+                        std::cerr << "Error opening file for writing!" << std::endl;
+                     }
+                     outFile << data;
+                     outFile.close();
                      checkWin = players[1].name;
                      return checkWin;
                   } else if (p1Decision == "c") {
                      if (amountToCall == 0.0) {
                         std::cout << "Player 1 checked" << std::endl << std::endl;
+                        std::ostringstream oss;
+                        oss << "Player 1 checked" << std::endl;
+                        std::string data = oss.str();
+                        std::ofstream outFile("gameLogs.txt", std::ios::app);
+                        if (!outFile) {
+                           std::cerr << "Error opening file for writing!" << std::endl;
+                        }
+                        outFile << data;
+                        outFile.close();
                         break;
                      } else if (amountToCall == bigBlind - smallBlind) {
                         std::cout << "Player 1 limped" << std::endl << std::endl;
+                        std::ostringstream oss;
+                        oss << "Player 1 limped" << std::endl;
+                        std::string data = oss.str();
+                        std::ofstream outFile("gameLogs.txt", std::ios::app);
+                        if (!outFile) {
+                           std::cerr << "Error opening file for writing!" << std::endl;
+                        }
+                        outFile << data;
+                        outFile.close();
                         totalBetAmountP1 = totalBetAmountP2;
                         players[0].stack = players[0].stack - amountToCall;
                         pot = pot + amountToCall;
@@ -1458,6 +1596,15 @@ class Dealer {
                         break;
                      } else {
                         std::cout << "Player 1 called " << totalBetAmountP2 << std::endl << std::endl;
+                        std::ostringstream oss;
+                        oss << "Player 1 called " << std::fixed << std::setprecision(2) << totalBetAmountP2 << std::endl;
+                        std::string data = oss.str();
+                        std::ofstream outFile("gameLogs.txt", std::ios::app);
+                        if (!outFile) {
+                           std::cerr << "Error opening file for writing!" << std::endl;
+                        }
+                        outFile << data;
+                        outFile.close();
                         players[0].stack = players[0].stack - amountToCall;
                         pot = pot + amountToCall;
                         betMatched = true;
@@ -1470,6 +1617,15 @@ class Dealer {
                      p1raise = p1raiseAbsolute - totalBetAmountP1;
                      totalBetAmountP1 = totalBetAmountP1 + p1raise;
                      std::cout << "Player 1 raised to " << p1raiseAbsolute << std::endl << std::endl;
+                     std::ostringstream oss;
+                     oss << "Player 1 raised to " << std::fixed << std::setprecision(2) << p1raiseAbsolute << std::endl;
+                     std::string data = oss.str();
+                     std::ofstream outFile("gameLogs.txt", std::ios::app);
+                     if (!outFile) {
+                        std::cerr << "Error opening file for writing!" << std::endl;
+                     }
+                     outFile << data;
+                     outFile.close();
                      players[0].stack = players[0].stack - p1raise;
                      pot = pot + p1raise;
                      amountToCall = p1raise - amountToCall;
@@ -1484,6 +1640,15 @@ class Dealer {
                      p1raise = p1raiseAbsolute - totalBetAmountP1;
                      totalBetAmountP1 = totalBetAmountP1 + p1raise;
                      std::cout << "Player 1 raised to " << p1raiseAbsolute << std::endl << std::endl;
+                     std::ostringstream oss;
+                     oss << "Player 1 raised to " << std::fixed << std::setprecision(2) << p1raiseAbsolute << std::endl;
+                     std::string data = oss.str();
+                     std::ofstream outFile("gameLogs.txt", std::ios::app);
+                     if (!outFile) {
+                        std::cerr << "Error opening file for writing!" << std::endl;
+                     }
+                     outFile << data;
+                     outFile.close();
                      players[0].stack = players[0].stack - p1raise;
                      pot = pot + p1raise;
                      amountToCall = p1raise - amountToCall;
@@ -1498,6 +1663,15 @@ class Dealer {
                      p1raise = p1raiseAbsolute - totalBetAmountP1;
                      totalBetAmountP1 = totalBetAmountP1 + p1raise;
                      std::cout << "Player 1 raised to " << p1raiseAbsolute << std::endl << std::endl;
+                     std::ostringstream oss;
+                     oss << "Player 1 raised to " << std::fixed << std::setprecision(2) << p1raiseAbsolute << std::endl;
+                     std::string data = oss.str();
+                     std::ofstream outFile("gameLogs.txt", std::ios::app);
+                     if (!outFile) {
+                        std::cerr << "Error opening file for writing!" << std::endl;
+                     }
+                     outFile << data;
+                     outFile.close();
                      players[0].stack = players[0].stack - p1raise;
                      pot = pot + p1raise;
                      amountToCall = p1raise - amountToCall;
@@ -1535,15 +1709,42 @@ class Dealer {
                      p2Decision = getFixedPlayerDecision(players[1], validBetSizes, validRaiseSizes, false);
                   }
                   if (p2Decision == "f") {
+                     std::ostringstream oss;
+                     oss << "Player 2 folded" << std::endl;
+                     std::string data = oss.str();
+                     std::ofstream outFile("gameLogs.txt", std::ios::app);
+                     if (!outFile) {
+                        std::cerr << "Error opening file for writing!" << std::endl;
+                     }
+                     outFile << data;
+                     outFile.close();
                      checkWin = players[0].name;
                      return checkWin;
                   } else if (p2Decision == "c") {
                      if (amountToCall == 0.0) {
                         std::cout << "Player 2 checked" << std::endl << std::endl;
+                        std::ostringstream oss;
+                        oss << "Player 2 checked" << std::endl;
+                        std::string data = oss.str();
+                        std::ofstream outFile("gameLogs.txt", std::ios::app);
+                        if (!outFile) {
+                           std::cerr << "Error opening file for writing!" << std::endl;
+                        }
+                        outFile << data;
+                        outFile.close();
                         betMatched = true;
                         break;
                      } else {
                         std::cout << "Player 2 called " << totalBetAmountP1 << std::endl << std::endl;
+                        std::ostringstream oss;
+                        oss << "Player 2 called " << std::fixed << std::setprecision(2) << totalBetAmountP1 << std::endl;
+                        std::string data = oss.str();
+                        std::ofstream outFile("gameLogs.txt", std::ios::app);
+                        if (!outFile) {
+                           std::cerr << "Error opening file for writing!" << std::endl;
+                        }
+                        outFile << data;
+                        outFile.close();
                         players[1].stack = players[1].stack - amountToCall;
                         pot = pot + amountToCall;
                         betMatched = true;
@@ -1556,6 +1757,15 @@ class Dealer {
                      p2raise = p2raiseAbsolute - totalBetAmountP2;
                      totalBetAmountP2 = totalBetAmountP2 + p2raise;
                      std::cout << "Player 2 raised to " << p2raiseAbsolute << std::endl << std::endl;
+                     std::ostringstream oss;
+                     oss << "Player 2 raised to " << std::fixed << std::setprecision(2) << p2raiseAbsolute << std::endl;
+                     std::string data = oss.str();
+                     std::ofstream outFile("gameLogs.txt", std::ios::app);
+                     if (!outFile) {
+                        std::cerr << "Error opening file for writing!" << std::endl;
+                     }
+                     outFile << data;
+                     outFile.close();
                      players[1].stack = players[1].stack - p2raise;
                      pot = pot + p2raise;
                      amountToCall = p2raise - amountToCall;
@@ -1570,6 +1780,15 @@ class Dealer {
                      p2raise = p2raiseAbsolute - totalBetAmountP2;
                      totalBetAmountP2 = totalBetAmountP2 + p2raise;
                      std::cout << "Player 2 raised to " << p2raiseAbsolute << std::endl << std::endl;
+                     std::ostringstream oss;
+                     oss << "Player 2 raised to " << std::fixed << std::setprecision(2) << p2raiseAbsolute << std::endl;
+                     std::string data = oss.str();
+                     std::ofstream outFile("gameLogs.txt", std::ios::app);
+                     if (!outFile) {
+                        std::cerr << "Error opening file for writing!" << std::endl;
+                     }
+                     outFile << data;
+                     outFile.close();
                      players[1].stack = players[1].stack - p2raise;
                      pot = pot + p2raise;
                      amountToCall = p2raise - amountToCall;
@@ -1584,6 +1803,15 @@ class Dealer {
                      p2raise = p2raiseAbsolute - totalBetAmountP2;
                      totalBetAmountP2 = totalBetAmountP2 + p2raise;
                      std::cout << "Player 2 raised to " << p2raiseAbsolute << std::endl << std::endl;
+                     std::ostringstream oss;
+                     oss << "Player 2 raised to " << std::fixed << std::setprecision(2) << p2raiseAbsolute << std::endl;
+                     std::string data = oss.str();
+                     std::ofstream outFile("gameLogs.txt", std::ios::app);
+                     if (!outFile) {
+                        std::cerr << "Error opening file for writing!" << std::endl;
+                     }
+                     outFile << data;
+                     outFile.close();
                      players[1].stack = players[1].stack - p2raise;
                      pot = pot + p2raise;
                      amountToCall = p2raise - amountToCall;
@@ -1670,14 +1898,41 @@ class Dealer {
                      p2Decision = getFixedPlayerDecision(players[1], validBetSizes, validRaiseSizes, false);
                   }
                   if (p2Decision == "f") {
+                     std::ostringstream oss;
+                     oss << "Player 2 folded" << std::endl;
+                     std::string data = oss.str();
+                     std::ofstream outFile("gameLogs.txt", std::ios::app);
+                     if (!outFile) {
+                        std::cerr << "Error opening file for writing!" << std::endl;
+                     }
+                     outFile << data;
+                     outFile.close();
                      checkWin = players[0].name;
                      return checkWin;
                   } else if (p2Decision == "c") {
                      if (amountToCall == 0.0) {
                         std::cout << "Player 2 checked" << std::endl << std::endl;
+                        std::ostringstream oss;
+                        oss << "Player 2 checked" << std::endl;
+                        std::string data = oss.str();
+                        std::ofstream outFile("gameLogs.txt", std::ios::app);
+                        if (!outFile) {
+                           std::cerr << "Error opening file for writing!" << std::endl;
+                        }
+                        outFile << data;
+                        outFile.close();
                         break;
                      } else if (amountToCall == bigBlind - smallBlind) {
                         std::cout << "Player 2 limped" << std::endl << std::endl;
+                        std::ostringstream oss;
+                        oss << "Player 2 limped" << std::endl;
+                        std::string data = oss.str();
+                        std::ofstream outFile("gameLogs.txt", std::ios::app);
+                        if (!outFile) {
+                           std::cerr << "Error opening file for writing!" << std::endl;
+                        }
+                        outFile << data;
+                        outFile.close();
                         totalBetAmountP2 = totalBetAmountP1;
                         players[1].stack = players[1].stack - amountToCall;
                         pot = pot + amountToCall;
@@ -1685,6 +1940,15 @@ class Dealer {
                         break;
                      } else {
                         std::cout << "Player 2 called " << totalBetAmountP1 << std::endl << std::endl;
+                        std::ostringstream oss;
+                        oss << "Player 2 called " << std::fixed << std::setprecision(2) << totalBetAmountP1 << std::endl;
+                        std::string data = oss.str();
+                        std::ofstream outFile("gameLogs.txt", std::ios::app);
+                        if (!outFile) {
+                           std::cerr << "Error opening file for writing!" << std::endl;
+                        }
+                        outFile << data;
+                        outFile.close();
                         players[1].stack = players[1].stack - amountToCall;
                         pot = pot + amountToCall;
                         betMatched = true;
@@ -1697,6 +1961,15 @@ class Dealer {
                      p2raise = p2raiseAbsolute - totalBetAmountP2;
                      totalBetAmountP2 = totalBetAmountP2 + p2raise;
                      std::cout << "Player 2 raised to " << p2raiseAbsolute << std::endl << std::endl;
+                     std::ostringstream oss;
+                     oss << "Player 2 raised to " << std::fixed << std::setprecision(2) << p2raiseAbsolute << std::endl;
+                     std::string data = oss.str();
+                     std::ofstream outFile("gameLogs.txt", std::ios::app);
+                     if (!outFile) {
+                        std::cerr << "Error opening file for writing!" << std::endl;
+                     }
+                     outFile << data;
+                     outFile.close();
                      players[1].stack = players[1].stack - p2raise;
                      pot = pot + p2raise;
                      amountToCall = p2raise - amountToCall;
@@ -1711,6 +1984,15 @@ class Dealer {
                      p2raise = p2raiseAbsolute - totalBetAmountP2;
                      totalBetAmountP2 = totalBetAmountP2 + p2raise;
                      std::cout << "Player 2 raised to " << p2raiseAbsolute << std::endl << std::endl;
+                     std::ostringstream oss;
+                     oss << "Player 2 raised to " << std::fixed << std::setprecision(2) << p2raiseAbsolute << std::endl;
+                     std::string data = oss.str();
+                     std::ofstream outFile("gameLogs.txt", std::ios::app);
+                     if (!outFile) {
+                        std::cerr << "Error opening file for writing!" << std::endl;
+                     }
+                     outFile << data;
+                     outFile.close();
                      players[1].stack = players[1].stack - p2raise;
                      pot = pot + p2raise;
                      amountToCall = p2raise - amountToCall;
@@ -1725,6 +2007,15 @@ class Dealer {
                      p2raise = p2raiseAbsolute - totalBetAmountP2;
                      totalBetAmountP2 = totalBetAmountP2 + p2raise;
                      std::cout << "Player 2 raised to " << p2raiseAbsolute << std::endl << std::endl;
+                     std::ostringstream oss;
+                     oss << "Player 2 raised to " << std::fixed << std::setprecision(2) << p2raiseAbsolute << std::endl;
+                     std::string data = oss.str();
+                     std::ofstream outFile("gameLogs.txt", std::ios::app);
+                     if (!outFile) {
+                        std::cerr << "Error opening file for writing!" << std::endl;
+                     }
+                     outFile << data;
+                     outFile.close();
                      players[1].stack = players[1].stack - p2raise;
                      pot = pot + p2raise;
                      amountToCall = p2raise - amountToCall;
@@ -1762,15 +2053,42 @@ class Dealer {
                      p1Decision = getFixedPlayerDecision(players[0], validBetSizes, validRaiseSizes, false);
                   }
                   if (p1Decision == "f") {
+                     std::ostringstream oss;
+                     oss << "Player 1 folded" << std::endl;
+                     std::string data = oss.str();
+                     std::ofstream outFile("gameLogs.txt", std::ios::app);
+                     if (!outFile) {
+                        std::cerr << "Error opening file for writing!" << std::endl;
+                     }
+                     outFile << data;
+                     outFile.close();
                      checkWin = players[1].name;
                      return checkWin;
                   } else if (p1Decision == "c") {
                      if (amountToCall == 0.0) {
                         std::cout << "Player 1 checked" << std::endl << std::endl;
+                        std::ostringstream oss;
+                        oss << "Player 1 checked" << std::endl;
+                        std::string data = oss.str();
+                        std::ofstream outFile("gameLogs.txt", std::ios::app);
+                        if (!outFile) {
+                           std::cerr << "Error opening file for writing!" << std::endl;
+                        }
+                        outFile << data;
+                        outFile.close();
                         betMatched = true;
                         break;
                      } else {
                         std::cout << "Player 1 called " << totalBetAmountP2 << std::endl << std::endl;
+                        std::ostringstream oss;
+                        oss << "Player 1 called " << std::fixed << std::setprecision(2) << totalBetAmountP2 << std::endl;
+                        std::string data = oss.str();
+                        std::ofstream outFile("gameLogs.txt", std::ios::app);
+                        if (!outFile) {
+                           std::cerr << "Error opening file for writing!" << std::endl;
+                        }
+                        outFile << data;
+                        outFile.close();
                         players[0].stack = players[0].stack - amountToCall;
                         pot = pot + amountToCall;
                         betMatched = true;
@@ -1783,6 +2101,15 @@ class Dealer {
                      p1raise = p1raiseAbsolute - totalBetAmountP1;
                      totalBetAmountP1 = totalBetAmountP1 + p1raise;
                      std::cout << "Player 1 raised to " << p1raiseAbsolute << std::endl << std::endl;
+                     std::ostringstream oss;
+                     oss << "Player 1 raised to " << std::fixed << std::setprecision(2) << p1raiseAbsolute << std::endl;
+                     std::string data = oss.str();
+                     std::ofstream outFile("gameLogs.txt", std::ios::app);
+                     if (!outFile) {
+                        std::cerr << "Error opening file for writing!" << std::endl;
+                     }
+                     outFile << data;
+                     outFile.close();
                      players[0].stack = players[0].stack - p1raise;
                      pot = pot + p1raise;
                      amountToCall = p1raise - amountToCall;
@@ -1797,6 +2124,15 @@ class Dealer {
                      p1raise = p1raiseAbsolute - totalBetAmountP1;
                      totalBetAmountP1 = totalBetAmountP1 + p1raise;
                      std::cout << "Player 1 raised to " << p1raiseAbsolute << std::endl << std::endl;
+                     std::ostringstream oss;
+                     oss << "Player 1 raised to " << std::fixed << std::setprecision(2) << p1raiseAbsolute << std::endl;
+                     std::string data = oss.str();
+                     std::ofstream outFile("gameLogs.txt", std::ios::app);
+                     if (!outFile) {
+                        std::cerr << "Error opening file for writing!" << std::endl;
+                     }
+                     outFile << data;
+                     outFile.close();
                      players[0].stack = players[0].stack - p1raise;
                      pot = pot + p1raise;
                      amountToCall = p1raise - amountToCall;
@@ -1811,6 +2147,15 @@ class Dealer {
                      p1raise = p1raiseAbsolute - totalBetAmountP1;
                      totalBetAmountP1 = totalBetAmountP1 + p1raise;
                      std::cout << "Player 1 raised to " << p1raiseAbsolute << std::endl << std::endl;
+                     std::ostringstream oss;
+                     oss << "Player 1 raised to " << std::fixed << std::setprecision(2) << p1raiseAbsolute << std::endl;
+                     std::string data = oss.str();
+                     std::ofstream outFile("gameLogs.txt", std::ios::app);
+                     if (!outFile) {
+                        std::cerr << "Error opening file for writing!" << std::endl;
+                     }
+                     outFile << data;
+                     outFile.close();
                      players[0].stack = players[0].stack - p1raise;
                      pot = pot + p1raise;
                      amountToCall = p1raise - amountToCall;
@@ -1833,6 +2178,16 @@ class Dealer {
 
       int startFixedPostFlopBettingRound(const float* betSizes, const float* raiseSizes) {
          std::vector<std::string> playerHands = getAllHands();
+         std::ostringstream oss;
+         oss << "The board is " << getBoard() << std::endl;
+         std::string data = oss.str();
+         std::ofstream outFile("gameLogs.txt", std::ios::app);
+         if (!outFile) {
+            std::cerr << "Error opening file for writing!" << std::endl;
+            return 1;
+         }
+         outFile << data;
+         outFile.close();
 
          int checkWin; //If checkWin = player.name, then that player won. If checkWin = 0, then both players matched each other's bet. If checkWin = -1 then one or both players are all in.
          float amountToCall = 0.0;
@@ -1872,14 +2227,41 @@ class Dealer {
                      }
                   }
                   if (p1Decision == "f") {
+                     std::ostringstream oss;
+                     oss << "Player 1 folded" << std::endl;
+                     std::string data = oss.str();
+                     std::ofstream outFile("gameLogs.txt", std::ios::app);
+                     if (!outFile) {
+                        std::cerr << "Error opening file for writing!" << std::endl;
+                     }
+                     outFile << data;
+                     outFile.close();
                      checkWin = players[1].name;
                      return checkWin;
                   } else if (p1Decision == "c") {
                      if (amountToCall == 0.0) {
                         std::cout << "Player 1 checked" << std::endl << std::endl;
+                        std::ostringstream oss;
+                        oss << "Player 1 checked" << std::endl;
+                        std::string data = oss.str();
+                        std::ofstream outFile("gameLogs.txt", std::ios::app);
+                        if (!outFile) {
+                           std::cerr << "Error opening file for writing!" << std::endl;
+                        }
+                        outFile << data;
+                        outFile.close();
                         break;
                      } else {
                         std::cout << "Player 1 called " << totalBetAmountP2 << std::endl << std::endl;
+                        std::ostringstream oss;
+                        oss << "Player 1 called " << std::fixed << std::setprecision(2) << totalBetAmountP2 << std::endl;
+                        std::string data = oss.str();
+                        std::ofstream outFile("gameLogs.txt", std::ios::app);
+                        if (!outFile) {
+                           std::cerr << "Error opening file for writing!" << std::endl;
+                        }
+                        outFile << data;
+                        outFile.close();
                         players[0].stack = players[0].stack - amountToCall;
                         pot = pot + amountToCall;
                         betMatched = true;
@@ -1893,6 +2275,15 @@ class Dealer {
                         p1raise = p1raiseAbsolute - totalBetAmountP1;
                         totalBetAmountP1 = totalBetAmountP1 + p1raise;
                         std::cout << "Player 1 raised to " << p1raiseAbsolute << std::endl << std::endl;
+                        std::ostringstream oss;
+                        oss << "Player 1 raised to " << std::fixed << std::setprecision(2) << p1raiseAbsolute << std::endl;
+                        std::string data = oss.str();
+                        std::ofstream outFile("gameLogs.txt", std::ios::app);
+                        if (!outFile) {
+                           std::cerr << "Error opening file for writing!" << std::endl;
+                        }
+                        outFile << data;
+                        outFile.close();
                         players[0].stack = players[0].stack - p1raise;
                         pot = pot + p1raise;
                         amountToCall = p1raise - amountToCall;
@@ -1905,6 +2296,15 @@ class Dealer {
                         p1bet = validBetSizes[0];
                         totalBetAmountP1 = totalBetAmountP1 + p1bet;
                         std::cout << "Player 1 bet " << p1bet << std::endl << std::endl;
+                        std::ostringstream oss;
+                        oss << "Player 1 bet " << std::fixed << std::setprecision(2) << p1bet << std::endl;
+                        std::string data = oss.str();
+                        std::ofstream outFile("gameLogs.txt", std::ios::app);
+                        if (!outFile) {
+                           std::cerr << "Error opening file for writing!" << std::endl;
+                        }
+                        outFile << data;
+                        outFile.close();
                         players[0].stack = players[0].stack - p1bet;
                         pot = pot + p1bet;
                         amountToCall = p1bet;
@@ -1921,6 +2321,15 @@ class Dealer {
                         p1raise = p1raiseAbsolute - totalBetAmountP1;
                         totalBetAmountP1 = totalBetAmountP1 + p1raise;
                         std::cout << "Player 1 raised to " << p1raiseAbsolute << std::endl << std::endl;
+                        std::ostringstream oss;
+                        oss << "Player 1 rasied to " << std::fixed << std::setprecision(2) << p1raiseAbsolute << std::endl;
+                        std::string data = oss.str();
+                        std::ofstream outFile("gameLogs.txt", std::ios::app);
+                        if (!outFile) {
+                           std::cerr << "Error opening file for writing!" << std::endl;
+                        }
+                        outFile << data;
+                        outFile.close();
                         players[0].stack = players[0].stack - p1raise;
                         pot = pot + p1raise;
                         amountToCall = p1raise - amountToCall;
@@ -1933,6 +2342,15 @@ class Dealer {
                         p1bet = validBetSizes[1];
                         totalBetAmountP1 = totalBetAmountP1 + p1bet;
                         std::cout << "Player 1 bet " << p1bet << std::endl << std::endl;
+                        std::ostringstream oss;
+                        oss << "Player 1 bet " << std::fixed << std::setprecision(2) << p1bet << std::endl;
+                        std::string data = oss.str();
+                        std::ofstream outFile("gameLogs.txt", std::ios::app);
+                        if (!outFile) {
+                           std::cerr << "Error opening file for writing!" << std::endl;
+                        }
+                        outFile << data;
+                        outFile.close();
                         players[0].stack = players[0].stack - p1bet;
                         pot = pot + p1bet;
                         amountToCall = p1bet;
@@ -1949,6 +2367,15 @@ class Dealer {
                         p1raise = p1raiseAbsolute - totalBetAmountP1;
                         totalBetAmountP1 = totalBetAmountP1 + p1raise;
                         std::cout << "Player 1 raised to " << p1raiseAbsolute << std::endl << std::endl;
+                        std::ostringstream oss;
+                        oss << "Player 1 raised to " << std::fixed << std::setprecision(2) << p1raiseAbsolute << std::endl;
+                        std::string data = oss.str();
+                        std::ofstream outFile("gameLogs.txt", std::ios::app);
+                        if (!outFile) {
+                           std::cerr << "Error opening file for writing!" << std::endl;
+                        }
+                        outFile << data;
+                        outFile.close();
                         players[0].stack = players[0].stack - p1raise;
                         pot = pot + p1raise;
                         amountToCall = p1raise - amountToCall;
@@ -1961,6 +2388,15 @@ class Dealer {
                         p1bet = validBetSizes[2];
                         totalBetAmountP1 = totalBetAmountP1 + p1bet;
                         std::cout << "Player 1 bet " << p1bet << std::endl << std::endl;
+                        std::ostringstream oss;
+                        oss << "Player 1 bet " << std::fixed << std::setprecision(2) << p1bet << std::endl;
+                        std::string data = oss.str();
+                        std::ofstream outFile("gameLogs.txt", std::ios::app);
+                        if (!outFile) {
+                           std::cerr << "Error opening file for writing!" << std::endl;
+                        }
+                        outFile << data;
+                        outFile.close();
                         players[0].stack = players[0].stack - p1bet;
                         pot = pot + p1bet;
                         amountToCall = p1bet;
@@ -2003,15 +2439,42 @@ class Dealer {
                      }
                   }
                   if (p2Decision == "f") {
+                     std::ostringstream oss;
+                     oss << "Player 2 folded" << std::endl;
+                     std::string data = oss.str();
+                     std::ofstream outFile("gameLogs.txt", std::ios::app);
+                     if (!outFile) {
+                        std::cerr << "Error opening file for writing!" << std::endl;
+                     }
+                     outFile << data;
+                     outFile.close();
                      checkWin = players[0].name;
                      return checkWin;
                   } else if (p2Decision == "c") {
                      if (amountToCall == 0.0) {
                         std::cout << "Player 2 checked" << std::endl << std::endl;
+                        std::ostringstream oss;
+                        oss << "Player 2 checked" << std::endl;
+                        std::string data = oss.str();
+                        std::ofstream outFile("gameLogs.txt", std::ios::app);
+                        if (!outFile) {
+                           std::cerr << "Error opening file for writing!" << std::endl;
+                        }
+                        outFile << data;
+                        outFile.close();
                         betMatched = true;
                         break;
                      } else {
                         std::cout << "Player 2 called " << totalBetAmountP1 << std::endl << std::endl;
+                        std::ostringstream oss;
+                        oss << "Player 2 called " << std::fixed << std::setprecision(2) << totalBetAmountP1 << std::endl;
+                        std::string data = oss.str();
+                        std::ofstream outFile("gameLogs.txt", std::ios::app);
+                        if (!outFile) {
+                           std::cerr << "Error opening file for writing!" << std::endl;
+                        }
+                        outFile << data;
+                        outFile.close();
                         players[1].stack = players[1].stack - amountToCall;
                         pot = pot + amountToCall;
                         betMatched = true;
@@ -2025,6 +2488,15 @@ class Dealer {
                         p2raise = p2raiseAbsolute - totalBetAmountP2;
                         totalBetAmountP2 = totalBetAmountP2 + p2raise;
                         std::cout << "Player 2 raised to " << p2raiseAbsolute << std::endl << std::endl;
+                        std::ostringstream oss;
+                        oss << "Player 2 raised to " << std::fixed << std::setprecision(2) << p2raiseAbsolute << std::endl;
+                        std::string data = oss.str();
+                        std::ofstream outFile("gameLogs.txt", std::ios::app);
+                        if (!outFile) {
+                           std::cerr << "Error opening file for writing!" << std::endl;
+                        }
+                        outFile << data;
+                        outFile.close();
                         players[1].stack = players[1].stack - p2raise;
                         pot = pot + p2raise;
                         amountToCall = p2raise - amountToCall;
@@ -2037,6 +2509,15 @@ class Dealer {
                         p2bet = validBetSizes[0];
                         totalBetAmountP2 = totalBetAmountP2 + p2bet;
                         std::cout << "Player 2 bet " << p2bet << std::endl << std::endl;
+                        std::ostringstream oss;
+                        oss << "Player 2 bet " << std::fixed << std::setprecision(2) << p2bet << std::endl;
+                        std::string data = oss.str();
+                        std::ofstream outFile("gameLogs.txt", std::ios::app);
+                        if (!outFile) {
+                           std::cerr << "Error opening file for writing!" << std::endl;
+                        }
+                        outFile << data;
+                        outFile.close();
                         players[1].stack = players[1].stack - p2bet;
                         pot = pot + p2bet;
                         amountToCall = p2bet;
@@ -2053,6 +2534,15 @@ class Dealer {
                         p2raise = p2raiseAbsolute - totalBetAmountP2;
                         totalBetAmountP2 = totalBetAmountP2 + p2raise;
                         std::cout << "Player 2 raised to " << p2raiseAbsolute << std::endl << std::endl;
+                        std::ostringstream oss;
+                        oss << "Player 2 raised to " << std::fixed << std::setprecision(2) << p2raiseAbsolute << std::endl;
+                        std::string data = oss.str();
+                        std::ofstream outFile("gameLogs.txt", std::ios::app);
+                        if (!outFile) {
+                           std::cerr << "Error opening file for writing!" << std::endl;
+                        }
+                        outFile << data;
+                        outFile.close();
                         players[1].stack = players[1].stack - p2raise;
                         pot = pot + p2raise;
                         amountToCall = p2raise - amountToCall;
@@ -2065,6 +2555,15 @@ class Dealer {
                         p2bet = validBetSizes[1];
                         totalBetAmountP2 = totalBetAmountP2 + p2bet;
                         std::cout << "Player 2 bet " << p2bet << std::endl << std::endl;
+                        std::ostringstream oss;
+                        oss << "Player 2 bet " << std::fixed << std::setprecision(2) << p2bet << std::endl;
+                        std::string data = oss.str();
+                        std::ofstream outFile("gameLogs.txt", std::ios::app);
+                        if (!outFile) {
+                           std::cerr << "Error opening file for writing!" << std::endl;
+                        }
+                        outFile << data;
+                        outFile.close();
                         players[1].stack = players[1].stack - p2bet;
                         pot = pot + p2bet;
                         amountToCall = p2bet;
@@ -2081,6 +2580,15 @@ class Dealer {
                         p2raise = p2raiseAbsolute - totalBetAmountP2;
                         totalBetAmountP2 = totalBetAmountP2 + p2raise;
                         std::cout << "Player 2 raised to " << p2raiseAbsolute << std::endl << std::endl;
+                        std::ostringstream oss;
+                        oss << "Player 2 raised to " << std::fixed << std::setprecision(2) << p2raiseAbsolute << std::endl;
+                        std::string data = oss.str();
+                        std::ofstream outFile("gameLogs.txt", std::ios::app);
+                        if (!outFile) {
+                           std::cerr << "Error opening file for writing!" << std::endl;
+                        }
+                        outFile << data;
+                        outFile.close();
                         players[1].stack = players[1].stack - p2raise;
                         pot = pot + p2raise;
                         amountToCall = p2raise - amountToCall;
@@ -2093,6 +2601,15 @@ class Dealer {
                         p2bet = validBetSizes[2];
                         totalBetAmountP2 = totalBetAmountP2 + p2bet;
                         std::cout << "Player 2 bet " << p2bet << std::endl << std::endl;
+                        std::ostringstream oss;
+                        oss << "Player 2 bet " << std::fixed << std::setprecision(2) << p2bet << std::endl;
+                        std::string data = oss.str();
+                        std::ofstream outFile("gameLogs.txt", std::ios::app);
+                        if (!outFile) {
+                           std::cerr << "Error opening file for writing!" << std::endl;
+                        }
+                        outFile << data;
+                        outFile.close();
                         players[1].stack = players[1].stack - p2bet;
                         pot = pot + p2bet;
                         amountToCall = p2bet;
@@ -2140,14 +2657,41 @@ class Dealer {
                      }
                   }
                   if (p2Decision == "f") {
+                     std::ostringstream oss;
+                     oss << "Player 2 folded" << std::endl;
+                     std::string data = oss.str();
+                     std::ofstream outFile("gameLogs.txt", std::ios::app);
+                     if (!outFile) {
+                        std::cerr << "Error opening file for writing!" << std::endl;
+                     }
+                     outFile << data;
+                     outFile.close();
                      checkWin = players[0].name;
                      return checkWin;
                   } else if (p2Decision == "c") {
                      if (amountToCall == 0.0) {
                         std::cout << "Player 2 checked" << std::endl << std::endl;
+                        std::ostringstream oss;
+                        oss << "Player 2 checked" << std::endl;
+                        std::string data = oss.str();
+                        std::ofstream outFile("gameLogs.txt", std::ios::app);
+                        if (!outFile) {
+                           std::cerr << "Error opening file for writing!" << std::endl;
+                        }
+                        outFile << data;
+                        outFile.close();
                         break;
                      } else {
                         std::cout << "Player 2 called " << totalBetAmountP1 << std::endl << std::endl;
+                        std::ostringstream oss;
+                        oss << "Player 2 called " << std::fixed << std::setprecision(2) << totalBetAmountP1 << std::endl;
+                        std::string data = oss.str();
+                        std::ofstream outFile("gameLogs.txt", std::ios::app);
+                        if (!outFile) {
+                           std::cerr << "Error opening file for writing!" << std::endl;
+                        }
+                        outFile << data;
+                        outFile.close();
                         players[1].stack = players[1].stack - amountToCall;
                         pot = pot + amountToCall;
                         betMatched = true;
@@ -2161,6 +2705,15 @@ class Dealer {
                         p2raise = p2raiseAbsolute - totalBetAmountP2;
                         totalBetAmountP2 = totalBetAmountP2 + p2raise;
                         std::cout << "Player 2 raised to " << p2raiseAbsolute << std::endl << std::endl;
+                        std::ostringstream oss;
+                        oss << "Player 2 raised to " << std::fixed << std::setprecision(2) << p2raiseAbsolute << std::endl;
+                        std::string data = oss.str();
+                        std::ofstream outFile("gameLogs.txt", std::ios::app);
+                        if (!outFile) {
+                           std::cerr << "Error opening file for writing!" << std::endl;
+                        }
+                        outFile << data;
+                        outFile.close();
                         players[1].stack = players[1].stack - p2raise;
                         pot = pot + p2raise;
                         amountToCall = p2raise - amountToCall;
@@ -2173,6 +2726,15 @@ class Dealer {
                         p2bet = validBetSizes[0];
                         totalBetAmountP2 = totalBetAmountP2 + p2bet;
                         std::cout << "Player 2 bet " << p2bet << std::endl << std::endl;
+                        std::ostringstream oss;
+                        oss << "Player 2 bet " << std::fixed << std::setprecision(2) << p2bet << std::endl;
+                        std::string data = oss.str();
+                        std::ofstream outFile("gameLogs.txt", std::ios::app);
+                        if (!outFile) {
+                           std::cerr << "Error opening file for writing!" << std::endl;
+                        }
+                        outFile << data;
+                        outFile.close();
                         players[1].stack = players[1].stack - p2bet;
                         pot = pot + p2bet;
                         amountToCall = p2bet;
@@ -2189,6 +2751,15 @@ class Dealer {
                         p2raise = p2raiseAbsolute - totalBetAmountP2;
                         totalBetAmountP2 = totalBetAmountP2 + p2raise;
                         std::cout << "Player 2 raised to " << p2raiseAbsolute << std::endl << std::endl;
+                        std::ostringstream oss;
+                        oss << "Player 2 raised to " << std::fixed << std::setprecision(2) << p2raiseAbsolute << std::endl;
+                        std::string data = oss.str();
+                        std::ofstream outFile("gameLogs.txt", std::ios::app);
+                        if (!outFile) {
+                           std::cerr << "Error opening file for writing!" << std::endl;
+                        }
+                        outFile << data;
+                        outFile.close();
                         players[1].stack = players[1].stack - p2raise;
                         pot = pot + p2raise;
                         amountToCall = p2raise - amountToCall;
@@ -2201,6 +2772,15 @@ class Dealer {
                         p2bet = validBetSizes[1];
                         totalBetAmountP2 = totalBetAmountP2 + p2bet;
                         std::cout << "Player 2 bet " << p2bet << std::endl << std::endl;
+                        std::ostringstream oss;
+                        oss << "Player 2 bet " << std::fixed << std::setprecision(2) << p2bet << std::endl;
+                        std::string data = oss.str();
+                        std::ofstream outFile("gameLogs.txt", std::ios::app);
+                        if (!outFile) {
+                           std::cerr << "Error opening file for writing!" << std::endl;
+                        }
+                        outFile << data;
+                        outFile.close();
                         players[1].stack = players[1].stack - p2bet;
                         pot = pot + p2bet;
                         amountToCall = p2bet;
@@ -2217,6 +2797,15 @@ class Dealer {
                         p2raise = p2raiseAbsolute - totalBetAmountP2;
                         totalBetAmountP2 = totalBetAmountP2 + p2raise;
                         std::cout << "Player 2 raised to " << p2raiseAbsolute << std::endl << std::endl;
+                        std::ostringstream oss;
+                        oss << "Player 2 raised to " << std::fixed << std::setprecision(2) << p2raiseAbsolute << std::endl;
+                        std::string data = oss.str();
+                        std::ofstream outFile("gameLogs.txt", std::ios::app);
+                        if (!outFile) {
+                           std::cerr << "Error opening file for writing!" << std::endl;
+                        }
+                        outFile << data;
+                        outFile.close();
                         players[1].stack = players[1].stack - p2raise;
                         pot = pot + p2raise;
                         amountToCall = p2raise - amountToCall;
@@ -2229,6 +2818,15 @@ class Dealer {
                         p2bet = validBetSizes[2];
                         totalBetAmountP2 = totalBetAmountP2 + p2bet;
                         std::cout << "Player 2 bet " << p2bet << std::endl << std::endl;
+                        std::ostringstream oss;
+                        oss << "Player 2 bet " << std::fixed << std::setprecision(2) << p2bet << std::endl;
+                        std::string data = oss.str();
+                        std::ofstream outFile("gameLogs.txt", std::ios::app);
+                        if (!outFile) {
+                           std::cerr << "Error opening file for writing!" << std::endl;
+                        }
+                        outFile << data;
+                        outFile.close();
                         players[1].stack = players[1].stack - p2bet;
                         pot = pot + p2bet;
                         amountToCall = p2bet;
@@ -2271,15 +2869,42 @@ class Dealer {
                      }
                   }
                   if (p1Decision == "f") {
+                     std::ostringstream oss;
+                     oss << "Player 1 folded" << std::endl;
+                     std::string data = oss.str();
+                     std::ofstream outFile("gameLogs.txt", std::ios::app);
+                     if (!outFile) {
+                        std::cerr << "Error opening file for writing!" << std::endl;
+                     }
+                     outFile << data;
+                     outFile.close();
                      checkWin = players[1].name;
                      return checkWin;
                   } else if (p1Decision == "c") {
                      if (amountToCall == 0.0) {
                         std::cout << "Player 1 checked" << std::endl << std::endl;
+                        std::ostringstream oss;
+                        oss << "Player 1 checked" << std::endl;
+                        std::string data = oss.str();
+                        std::ofstream outFile("gameLogs.txt", std::ios::app);
+                        if (!outFile) {
+                           std::cerr << "Error opening file for writing!" << std::endl;
+                        }
+                        outFile << data;
+                        outFile.close();
                         betMatched = true;
                         break;
                      } else {
                         std::cout << "Player 1 called " << totalBetAmountP2 << std::endl << std::endl;
+                        std::ostringstream oss;
+                        oss << "Player 1 called " << std::fixed << std::setprecision(2) << totalBetAmountP2 << std::endl;
+                        std::string data = oss.str();
+                        std::ofstream outFile("gameLogs.txt", std::ios::app);
+                        if (!outFile) {
+                           std::cerr << "Error opening file for writing!" << std::endl;
+                        }
+                        outFile << data;
+                        outFile.close();
                         players[0].stack = players[0].stack - amountToCall;
                         pot = pot + amountToCall;
                         betMatched = true;
@@ -2293,6 +2918,15 @@ class Dealer {
                         p1raise = p1raiseAbsolute - totalBetAmountP1;
                         totalBetAmountP1 = totalBetAmountP1 + p1raise;
                         std::cout << "Player 1 raised to " << p1raiseAbsolute << std::endl << std::endl;
+                        std::ostringstream oss;
+                        oss << "Player 1 raised to " << std::fixed << std::setprecision(2) << p1raiseAbsolute << std::endl;
+                        std::string data = oss.str();
+                        std::ofstream outFile("gameLogs.txt", std::ios::app);
+                        if (!outFile) {
+                           std::cerr << "Error opening file for writing!" << std::endl;
+                        }
+                        outFile << data;
+                        outFile.close();
                         players[0].stack = players[0].stack - p1raise;
                         pot = pot + p1raise;
                         amountToCall = p1raise - amountToCall;
@@ -2305,6 +2939,15 @@ class Dealer {
                         p1bet = validBetSizes[0];
                         totalBetAmountP1 = totalBetAmountP1 + p1bet;
                         std::cout << "Player 1 bet " << p1bet << std::endl << std::endl;
+                        std::ostringstream oss;
+                        oss << "Player 1 bet " << std::fixed << std::setprecision(2) << p1bet << std::endl;
+                        std::string data = oss.str();
+                        std::ofstream outFile("gameLogs.txt", std::ios::app);
+                        if (!outFile) {
+                           std::cerr << "Error opening file for writing!" << std::endl;
+                        }
+                        outFile << data;
+                        outFile.close();
                         players[0].stack = players[0].stack - p1bet;
                         pot = pot + p1bet;
                         amountToCall = p1bet;
@@ -2321,6 +2964,15 @@ class Dealer {
                         p1raise = p1raiseAbsolute - totalBetAmountP1;
                         totalBetAmountP1 = totalBetAmountP1 + p1raise;
                         std::cout << "Player 1 raised to " << p1raiseAbsolute << std::endl << std::endl;
+                        std::ostringstream oss;
+                        oss << "Player 1 raised to " << std::fixed << std::setprecision(2) << p1raiseAbsolute << std::endl;
+                        std::string data = oss.str();
+                        std::ofstream outFile("gameLogs.txt", std::ios::app);
+                        if (!outFile) {
+                           std::cerr << "Error opening file for writing!" << std::endl;
+                        }
+                        outFile << data;
+                        outFile.close();
                         players[0].stack = players[0].stack - p1raise;
                         pot = pot + p1raise;
                         amountToCall = p1raise - amountToCall;
@@ -2333,6 +2985,15 @@ class Dealer {
                         p1bet = validBetSizes[1];
                         totalBetAmountP1 = totalBetAmountP1 + p1bet;
                         std::cout << "Player 1 bet " << p1bet << std::endl << std::endl;
+                        std::ostringstream oss;
+                        oss << "Player 1 bet " << std::fixed << std::setprecision(2) << p1bet << std::endl;
+                        std::string data = oss.str();
+                        std::ofstream outFile("gameLogs.txt", std::ios::app);
+                        if (!outFile) {
+                           std::cerr << "Error opening file for writing!" << std::endl;
+                        }
+                        outFile << data;
+                        outFile.close();
                         players[0].stack = players[0].stack - p1bet;
                         pot = pot + p1bet;
                         amountToCall = p1bet;
@@ -2349,6 +3010,15 @@ class Dealer {
                         p1raise = p1raiseAbsolute - totalBetAmountP1;
                         totalBetAmountP1 = totalBetAmountP1 + p1raise;
                         std::cout << "Player 1 raised to " << p1raiseAbsolute << std::endl << std::endl;
+                        std::ostringstream oss;
+                        oss << "Player 1 raised to " << std::fixed << std::setprecision(2) << p1raiseAbsolute << std::endl;
+                        std::string data = oss.str();
+                        std::ofstream outFile("gameLogs.txt", std::ios::app);
+                        if (!outFile) {
+                           std::cerr << "Error opening file for writing!" << std::endl;
+                        }
+                        outFile << data;
+                        outFile.close();
                         players[0].stack = players[0].stack - p1raise;
                         pot = pot + p1raise;
                         amountToCall = p1raise - amountToCall;
@@ -2361,6 +3031,15 @@ class Dealer {
                         p1bet = validBetSizes[2];
                         totalBetAmountP1 = totalBetAmountP1 + p1bet;
                         std::cout << "Player 1 bet " << p1bet << std::endl << std::endl;
+                        std::ostringstream oss;
+                        oss << "Player 1 bet " << std::fixed << std::setprecision(2) << p1bet << std::endl;
+                        std::string data = oss.str();
+                        std::ofstream outFile("gameLogs.txt", std::ios::app);
+                        if (!outFile) {
+                           std::cerr << "Error opening file for writing!" << std::endl;
+                        }
+                        outFile << data;
+                        outFile.close();
                         players[0].stack = players[0].stack - p1bet;
                         pot = pot + p1bet;
                         amountToCall = p1bet;
@@ -2398,6 +3077,15 @@ class Dealer {
                std::cout << std::endl;
             } else {
                std::cout << "Player 1 wins the hand!" << std::endl << std::endl;
+               std::ostringstream oss;
+               oss << "Player 1 wins the hand" << std::endl << std::endl;
+               std::string data = oss.str();
+               std::ofstream outFile("gameLogs.txt", std::ios::app);
+               if (!outFile) {
+                  std::cerr << "Error opening file for writing!" << std::endl;
+               }
+               outFile << data;
+               outFile.close();
                players[0].stack = players[0].stack + pot;
                pot = 0.0;
                showStacks();
@@ -2417,6 +3105,15 @@ class Dealer {
                std::cout << std::endl;
             } else {
                std::cout << "Player 2 wins the hand!" << std::endl << std::endl;
+               std::ostringstream oss;
+               oss << "Player 2 wins the hand" << std::endl << std::endl;
+               std::string data = oss.str();
+               std::ofstream outFile("gameLogs.txt", std::ios::app);
+               if (!outFile) {
+                  std::cerr << "Error opening file for writing!" << std::endl;
+               }
+               outFile << data;
+               outFile.close();
                players[1].stack = players[1].stack + pot;
                pot = 0.0;
                showStacks();
@@ -2437,6 +3134,15 @@ class Dealer {
                   std::cout << std::endl;
                } else {
                   std::cout << "Player 1 wins the hand!" << std::endl << std::endl;
+                  std::ostringstream oss;
+                  oss << "Player 1 wins the hand" << std::endl << std::endl;
+                  std::string data = oss.str();
+                  std::ofstream outFile("gameLogs.txt", std::ios::app);
+                  if (!outFile) {
+                     std::cerr << "Error opening file for writing!" << std::endl;
+                  }
+                  outFile << data;
+                  outFile.close();
                   players[0].stack = players[0].stack + pot;
                   pot = 0.0;
                   showStacks();
@@ -2456,6 +3162,15 @@ class Dealer {
                   std::cout << std::endl;
                } else {
                   std::cout << "Player 2 wins the hand!" << std::endl << std::endl;
+                  std::ostringstream oss;
+                  oss << "Player 2 wins the hand" << std::endl << std::endl;
+                  std::string data = oss.str();
+                  std::ofstream outFile("gameLogs.txt", std::ios::app);
+                  if (!outFile) {
+                     std::cerr << "Error opening file for writing!" << std::endl;
+                  }
+                  outFile << data;
+                  outFile.close();
                   players[1].stack = players[1].stack + pot;
                   pot = 0.0;
                   showStacks();
@@ -2463,6 +3178,15 @@ class Dealer {
                }
             } else {
                std::cout << "Players chop!" << std::endl << std::endl;
+               std::ostringstream oss;
+               oss << "Players chop" << std::endl << std::endl;
+               std::string data = oss.str();
+               std::ofstream outFile("gameLogs.txt", std::ios::app);
+               if (!outFile) {
+                  std::cerr << "Error opening file for writing!" << std::endl;
+               }
+               outFile << data;
+               outFile.close();
                players[0].stack = players[0].stack + pot * 0.5;
                players[1].stack = players[1].stack + pot * 0.5;
                pot = 0.0;
@@ -2607,6 +3331,17 @@ class Dealer {
          }
       }
 
+      std::string getBoard() {
+         int size = board.size();
+         std::string currentBoard;
+         if (size > 0) {
+            for (int i=0; i<size; i++) {
+               currentBoard = currentBoard + getCard(board[i]) + " ";
+            }
+         }
+         return currentBoard;
+      }
+
       void resetEverythingPostflop() {
          board.clear();
          for (int i=0; i<numPlayers; i++) {
@@ -2671,11 +3406,28 @@ class Node {
       }
 };
 
-class Range {
+class RandomGenerator {
+   private:
+      std::random_device rd;
+      std::mt19937 gen;
+      std::uniform_real_distribution<float> dis;
+
    public:
+      RandomGenerator() : gen(rd()), dis(0.0, 1.0) {}
+      float rnum() {return dis(gen);}
+      void reseed() {gen.seed(rd());}
+};
+
+class Range {
+   private:
+      static RandomGenerator rng;
+
       char values[13] = {'2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A'};
       char suits[4] = {'c', 'd', 'h', 's'};
 
+      Dealer dealer;
+
+      int totalCombos = 1326;
       int triangleNumbers[12] = {0, 1, 3, 6, 10, 15, 21, 28, 36, 45, 55, 66};
 
       float pairs[78] = {0.0};  //2D array of all pairs stored in row major ordering
@@ -2684,6 +3436,11 @@ class Range {
       float nonpairs[1248] = {0.0};  //3D triangular wedge shaped array of all nonpaired hands stored in row major ordering
       //value orders: 2, 3, 4, 5, 6, 7, 8, 9, T, J, Q, K, A
       //suit orders: cc, dd, hh, ss, cd, ch, cs, dc, dh, ds, hc, hd, hs, sc, sd, sh
+
+   public:
+      Range() {}
+
+      Range(std::string strand) {add(strand, 1.0);}
 
       Range operator-(const Range& other) const {
          Range newRange = Range();
@@ -2722,6 +3479,15 @@ class Range {
          }
          return newRange;
       }
+
+      /*Range operator%(const Range& other) const {
+
+      }*/
+
+      /*std::vector<int> getRandomHand() {
+         rng.reseed();
+         float r = rng.rnum();
+      }*/
 
       void add(int card1, int card2, float weight) {
          int suitIndex;
@@ -2777,6 +3543,21 @@ class Range {
          int valueIndex2 = std::min(card1 / 4, card2 / 4);
          if (nonpairs[suitIndex * 78 + triangleNumbers[valueIndex1-1] + valueIndex2] > 0.0) {return true;}
          return false;
+      }
+
+      int countCombos() {
+         int numCombos = 0;
+         for (int i=0; i<78; i++) {
+            if (pairs[i] > 0.0) {
+               numCombos += 1;
+            }
+         }
+         for (int i=0; i<1248; i++) {
+            if (nonpairs[i] > 0.0) {
+               numCombos += 1;
+            }
+         }
+         return numCombos;
       }
 
       bool checkPair(int card1, int card2) {

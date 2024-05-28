@@ -235,13 +235,32 @@ int main(int argc, char* argv[]) {
 
       if (dealer.players[0].stack <= 1e-4) {
          std::cout << "Player 2 wins the game! Thanks for playing!" << std::endl << std::endl;
+         std::ostringstream oss;
+         oss << "Player 2 wins the game" << std::endl << std::endl;
+         std::string data = oss.str();
+         std::ofstream outFile("gameLogs.txt", std::ios::app);
+         if (!outFile) {
+            std::cerr << "Error opening file for writing!" << std::endl;
+         }
+         outFile << data;
+         outFile.close();
          playAgain = false;
          break;
       } else if (dealer.players[1].stack <= 1e-4) {
          std::cout << "Player 1 wins the game! Thanks for playing!" << std::endl << std::endl;
+         std::ostringstream oss;
+         oss << "Player 1 wins the game" << std::endl << std::endl;
+         std::string data = oss.str();
+         std::ofstream outFile("gameLogs.txt", std::ios::app);
+         if (!outFile) {
+            std::cerr << "Error opening file for writing!" << std::endl;
+         }
+         outFile << data;
+         outFile.close();
          playAgain = false;
          break;
       } else {
+         /*
          std::string oneMoreHand;
          while (true) {
             std::cout << "Would you like to play another hand? (y = yes, n = no): ";
@@ -259,6 +278,7 @@ int main(int argc, char* argv[]) {
                std::cout << "Please type a valid input." << std::endl << std::endl;
             }
          }
+         */
       }
    }
    
@@ -267,15 +287,19 @@ int main(int argc, char* argv[]) {
 
 //calculate stats like VPIP, pot odds, implied odds, PFR, cbet%, etc. to the HUD
 
+//be able to create a game history and store each player's ranges at each spot in the hand
+
 //give each player a specific hand at the start of a betting round (removing those cards from the deck)
-//simulate range vs range equity
+//add the ability to tell if a player has a draw
 
 //create different bet sizings depending on which betting street we are on and what position we are in (IP or OOP)
 //redo raise size calculation as a percentage of the pot
 
+//add the ability to add specific hands to the opponent's range
 //make sure that I cannot add the same hand to the range twice
 //be able to subtract and classify ranges (folding, calling, raising, etc.)
 //be able to compare ranges (nut advantage and equity advantage)
+//simulate range vs range equity
 
 //create a decision tree of all past actions and some future actions to a certain depth
 //create an evaluation function that determines if certain situations are more favorable than others (dependent on ranges and current hand)

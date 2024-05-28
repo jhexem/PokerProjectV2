@@ -1,0 +1,539 @@
+Player 1 has 4c 6h
+Player 2 has Ks 5c
+Player 1 stack is 100.00
+Player 2 stack is 100.00
+Player 1 folded
+Player 2 wins the hand
+
+Player 1 has Ts 7c
+Player 2 has 4s As
+Player 1 stack is 99.50
+Player 2 stack is 100.50
+Player 2 raised to 3.00
+Player 1 called 3.00
+The board is 7s Jh 7d 
+Player 1 checked
+Player 2 bet 1.98
+Player 1 rasied to 5.94
+Player 2 called 5.94
+The board is 7s Jh 7d 8d 
+Player 1 bet 23.24
+Player 2 folded
+Player 1 wins the hand
+
+Player 1 has 8c Kc
+Player 2 has Jc Js
+Player 1 stack is 108.44
+Player 2 stack is 91.56
+Player 1 raised to 3.00
+Player 2 raised to 15.00
+Player 1 called 15.00
+The board is Tc 7h Jd 
+Player 2 checked
+Player 1 checked
+The board is Tc 7h Jd 9d 
+Player 2 bet 9.90
+Player 1 raised to 49.50
+Player 2 called 49.50
+The board is Tc 7h Jd 9d Ks 
+Player 2 bet 27.06
+Player 1 called 27.06
+Player 1 wins the hand
+
+Player 1 wins the game
+
+Player 1 has Qs Td
+Player 2 has Qc 4d
+Player 1 stack is 100.00
+Player 2 stack is 100.00
+Player 1 raised to 3.00
+Player 2 folded
+Player 1 wins the hand
+
+Player 1 has 3h 6s
+Player 2 has Kd 7h
+Player 1 stack is 101.00
+Player 2 stack is 99.00
+Player 2 raised to 3.00
+Player 1 folded
+Player 2 wins the hand
+
+Player 1 has Th 9h
+Player 2 has 2d 4s
+Player 1 stack is 100.00
+Player 2 stack is 100.00
+Player 1 raised to 3.00
+Player 2 called 3.00
+The board is 7d 8s Js 
+Player 2 checked
+Player 1 checked
+The board is 7d 8s Js Ts 
+Player 2 checked
+Player 1 bet 1.98
+Player 2 folded
+Player 1 wins the hand
+
+Player 1 has 4h 3s
+Player 2 has 6s As
+Player 1 stack is 103.00
+Player 2 stack is 97.00
+Player 2 raised to 3.00
+Player 1 folded
+Player 2 wins the hand
+
+Player 1 has 4c 3c
+Player 2 has 8c 3d
+Player 1 stack is 102.00
+Player 2 stack is 98.00
+Player 1 raised to 3.00
+Player 2 folded
+Player 1 wins the hand
+
+Player 1 has Jc Kd
+Player 2 has Jd 8c
+Player 1 stack is 103.00
+Player 2 stack is 97.00
+Player 2 raised to 3.00
+Player 1 raised to 15.00
+Player 2 called 15.00
+The board is 2h Qh 7d 
+Player 1 checked
+Player 2 checked
+The board is 2h Qh 7d Ts 
+Player 1 bet 22.50
+Player 2 folded
+Player 1 wins the hand
+
+Player 1 has 3d 9s
+Player 2 has 4h Ts
+Player 1 stack is 118.00
+Player 2 stack is 82.00
+Player 1 folded
+Player 2 wins the hand
+
+Player 1 has Ad 9c
+Player 2 has Qh 9h
+Player 1 stack is 117.50
+Player 2 stack is 82.50
+Player 2 raised to 3.00
+Player 1 raised to 15.00
+Player 2 called 15.00
+The board is Td Kh 2d 
+Player 1 checked
+Player 2 bet 9.90
+Player 1 called 9.90
+The board is Td Kh 2d Ts 
+Player 1 checked
+Player 2 checked
+The board is Td Kh 2d Ts 4s 
+Player 1 checked
+Player 2 checked
+Player 1 wins the hand
+
+Player 1 has Kc Ah
+Player 2 has 7c Ks
+Player 1 stack is 142.40
+Player 2 stack is 57.60
+Player 1 raised to 3.00
+Player 2 called 3.00
+The board is 9c 8d 7s 
+Player 2 checked
+Player 1 bet 1.98
+Player 2 called 1.98
+The board is 9c 8d 7s 2d 
+Player 2 checked
+Player 1 checked
+The board is 9c 8d 7s 2d 6s 
+Player 2 bet 12.95
+Player 1 called 12.95
+Player 2 wins the hand
+
+Player 1 has 4h Tc
+Player 2 has Jd Td
+Player 1 stack is 124.47
+Player 2 stack is 75.53
+Player 2 raised to 5.00
+Player 1 folded
+Player 2 wins the hand
+
+Player 1 has Qc 2d
+Player 2 has 2h 3d
+Player 1 stack is 123.47
+Player 2 stack is 76.53
+Player 1 folded
+Player 2 wins the hand
+
+Player 1 has 4c Th
+Player 2 has Kc Tc
+Player 1 stack is 122.97
+Player 2 stack is 77.03
+Player 2 raised to 3.00
+Player 1 folded
+Player 2 wins the hand
+
+Player 1 has 8h Ah
+Player 2 has 8c 9c
+Player 1 stack is 121.97
+Player 2 stack is 78.03
+Player 1 raised to 3.00
+Player 2 raised to 15.00
+Player 1 called 15.00
+The board is 5s 2s Kh 
+Player 2 checked
+Player 1 bet 9.90
+Player 2 called 9.90
+The board is 5s 2s Kh 9s 
+Player 2 bet 37.35
+Player 1 called 37.35
+The board is 5s 2s Kh 9s 6c 
+Player 2 checked
+Player 1 checked
+Player 2 wins the hand
+
+Player 1 has 4s 4c
+Player 2 has 9c 9h
+Player 1 stack is 59.72
+Player 2 stack is 140.28
+Player 2 raised to 3.00
+Player 1 called 3.00
+The board is 8c Ah 7s 
+Player 1 checked
+Player 2 bet 1.98
+Player 1 called 1.98
+The board is 8c Ah 7s Td 
+Player 1 checked
+Player 2 bet 7.47
+Player 1 folded
+Player 2 wins the hand
+
+Player 1 has 6s 6d
+Player 2 has As Ks
+Player 1 stack is 54.74
+Player 2 stack is 145.26
+Player 1 raised to 3.00
+Player 2 raised to 15.00
+Player 1 called 15.00
+The board is 8c Jc Jd 
+Player 2 checked
+Player 1 bet 22.50
+Player 2 called 22.50
+The board is 8c Jc Jd Qd 
+Player 2 bet 17.24
+Player 1 called 17.24
+Player 1 wins the hand
+
+Player 1 has 6c 6d
+Player 2 has Js 7c
+Player 1 stack is 100.00
+Player 2 stack is 100.00
+Player 1 raised to 3.00
+Player 2 called 3.00
+The board is 5c 3h 2d 
+Player 2 checked
+Player 1 bet 1.98
+Player 2 called 1.98
+The board is 5c 3h 2d Ac 
+Player 2 checked
+Player 1 checked
+The board is 5c 3h 2d Ac 3d 
+Player 2 bet 12.95
+Player 1 called 12.95
+Player 1 wins the hand
+
+Player 1 has Ks 3h
+Player 2 has 5h 2c
+Player 1 stack is 117.93
+Player 2 stack is 82.07
+Player 2 folded
+Player 1 wins the hand
+
+Player 1 has 7h 3d
+Player 2 has 2s 8c
+Player 1 stack is 118.43
+Player 2 stack is 81.57
+Player 1 folded
+Player 2 wins the hand
+
+Player 1 has 6c Ah
+Player 2 has 4d 2d
+Player 1 stack is 117.93
+Player 2 stack is 82.07
+Player 2 folded
+Player 1 wins the hand
+
+Player 1 has 8c 7h
+Player 2 has 3c 2s
+Player 1 stack is 118.43
+Player 2 stack is 81.57
+Player 1 raised to 3.00
+Player 2 folded
+Player 1 wins the hand
+
+Player 1 has 2d 8d
+Player 2 has Tc 3h
+Player 1 stack is 119.43
+Player 2 stack is 80.57
+Player 2 folded
+Player 1 wins the hand
+
+Player 1 has 2h 7d
+Player 2 has Ac Qc
+Player 1 stack is 119.93
+Player 2 stack is 80.07
+Player 1 folded
+Player 2 wins the hand
+
+Player 1 has 5h Kc
+Player 2 has As 4d
+Player 1 stack is 119.43
+Player 2 stack is 80.57
+Player 2 raised to 3.00
+Player 1 called 3.00
+The board is 4c Kd Jh 
+Player 1 checked
+Player 2 bet 4.50
+Player 1 called 4.50
+The board is 4c Kd Jh 6s 
+Player 1 bet 4.95
+Player 2 called 4.95
+The board is 4c Kd Jh 6s 8s 
+Player 1 bet 18.68
+Player 2 called 18.68
+Player 1 wins the hand
+
+Player 1 has 7h 2d
+Player 2 has Td 3h
+Player 1 stack is 150.55
+Player 2 stack is 49.45
+Player 1 folded
+Player 2 wins the hand
+
+Player 1 has Qs 4s
+Player 2 has Th 5h
+Player 1 stack is 150.05
+Player 2 stack is 49.95
+Player 2 raised to 3.00
+Player 1 called 3.00
+The board is 7h 6s 4h 
+Player 1 checked
+Player 2 bet 4.50
+Player 1 called 4.50
+The board is 7h 6s 4h 2d 
+Player 1 checked
+Player 2 bet 19.50
+Player 1 folded
+Player 2 wins the hand
+
+Player 1 has 2s Kh
+Player 2 has Js 3d
+Player 1 stack is 142.55
+Player 2 stack is 57.45
+Player 1 limped
+Player 2 checked
+The board is 3s Ah Jd 
+Player 2 bet 1.50
+Player 1 called 1.50
+The board is 3s Ah Jd Ts 
+Player 2 bet 3.75
+Player 1 folded
+Player 2 wins the hand
+
+Player 1 has 8c Qc
+Player 2 has 6s 8h
+Player 1 stack is 140.05
+Player 2 stack is 59.95
+Player 2 raised to 3.00
+Player 1 called 3.00
+The board is 4d 5d 2c 
+Player 1 bet 4.50
+Player 2 called 4.50
+The board is 4d 5d 2c 3s 
+Player 1 bet 19.50
+Player 2 called 19.50
+The board is 4d 5d 2c 3s Ks 
+Player 1 checked
+Player 2 bet 32.95
+Player 1 folded
+Player 2 wins the hand
+
+Player 1 has 8c 5d
+Player 2 has Kh 4c
+Player 1 stack is 113.05
+Player 2 stack is 86.95
+Player 1 folded
+Player 2 wins the hand
+
+Player 1 has Jc 7s
+Player 2 has 3s 4d
+Player 1 stack is 112.55
+Player 2 stack is 87.45
+Player 2 folded
+Player 1 wins the hand
+
+Player 1 has Th Kd
+Player 2 has 3c 5c
+Player 1 stack is 113.05
+Player 2 stack is 86.95
+Player 1 raised to 3.00
+Player 2 called 3.00
+The board is Kc 4s Jh 
+Player 2 checked
+Player 1 checked
+The board is Kc 4s Jh 3s 
+Player 2 checked
+Player 1 bet 4.50
+Player 2 called 4.50
+The board is Kc 4s Jh 3s Js 
+Player 2 bet 11.25
+Player 1 called 11.25
+Player 1 wins the hand
+
+Player 1 has 6d 4s
+Player 2 has Th 4c
+Player 1 stack is 131.80
+Player 2 stack is 68.20
+Player 2 folded
+Player 1 wins the hand
+
+Player 1 has 8d 9d
+Player 2 has Qs Jh
+Player 1 stack is 132.30
+Player 2 stack is 67.70
+Player 1 raised to 3.00
+Player 2 raised to 15.00
+Player 1 called 15.00
+The board is Ad 5s 3d 
+Player 2 bet 9.90
+Player 1 raised to 29.70
+Player 2 folded
+Player 1 wins the hand
+
+Player 1 has Ks 5c
+Player 2 has 4s Jh
+Player 1 stack is 157.20
+Player 2 stack is 42.80
+Player 2 folded
+Player 1 wins the hand
+
+Player 1 has Ks 3d
+Player 2 has 4d 7d
+Player 1 stack is 157.70
+Player 2 stack is 42.30
+Player 1 raised to 3.00
+Player 2 called 3.00
+The board is 2s 8d 3h 
+Player 2 checked
+Player 1 checked
+The board is 2s 8d 3h Th 
+Player 2 checked
+Player 1 checked
+The board is 2s 8d 3h Th 5d 
+Player 2 checked
+Player 1 checked
+Player 1 wins the hand
+
+Player 1 has Th 5s
+Player 2 has Kd Qd
+Player 1 stack is 160.70
+Player 2 stack is 39.30
+Player 2 raised to 3.00
+Player 1 called 3.00
+The board is 7d 9s 4h 
+Player 1 checked
+Player 2 bet 1.98
+Player 1 folded
+Player 2 wins the hand
+
+Player 1 has 9d 5d
+Player 2 has 7d 7c
+Player 1 stack is 157.70
+Player 2 stack is 42.30
+Player 1 raised to 3.00
+Player 2 called 3.00
+The board is Jc 5h Qh 
+Player 2 checked
+Player 1 checked
+The board is Jc 5h Qh 2s 
+Player 2 checked
+Player 1 checked
+The board is Jc 5h Qh 2s 6c 
+Player 2 bet 1.98
+Player 1 called 1.98
+Player 2 wins the hand
+
+Player 1 has 9d 2h
+Player 2 has Kc Ad
+Player 1 stack is 152.72
+Player 2 stack is 47.28
+Player 2 raised to 3.00
+Player 1 folded
+Player 2 wins the hand
+
+Player 1 has As 6c
+Player 2 has 6s 7h
+Player 1 stack is 151.72
+Player 2 stack is 48.28
+Player 1 raised to 3.00
+Player 2 called 3.00
+The board is Tc 4d 9c 
+Player 2 checked
+Player 1 checked
+The board is Tc 4d 9c 3s 
+Player 2 bet 4.50
+Player 1 called 4.50
+The board is Tc 4d 9c 3s Jh 
+Player 2 checked
+Player 1 checked
+Player 1 wins the hand
+
+Player 1 has Ts Qs
+Player 2 has Js 5c
+Player 1 stack is 159.22
+Player 2 stack is 40.78
+Player 2 raised to 3.00
+Player 1 raised to 15.00
+Player 2 folded
+Player 1 wins the hand
+
+Player 1 has Ac 5d
+Player 2 has Ks Kh
+Player 1 stack is 162.22
+Player 2 stack is 37.78
+Player 1 raised to 3.00
+Player 2 raised to 15.00
+Player 1 called 15.00
+The board is 7s 5h 2c 
+Player 2 checked
+Player 1 checked
+The board is 7s 5h 2c Ts 
+Player 2 bet 22.78
+Player 1 called 22.78
+Player 2 wins the hand
+
+Player 1 has 4d Ah
+Player 2 has 9h 2h
+Player 1 stack is 124.45
+Player 2 stack is 75.55
+Player 2 folded
+Player 1 wins the hand
+
+Player 1 has Td 7s
+Player 2 has 9h 5d
+Player 1 stack is 124.95
+Player 2 stack is 75.05
+Player 1 raised to 3.00
+Player 2 called 3.00
+The board is Ts Kc 7d 
+Player 2 checked
+Player 1 bet 4.50
+Player 2 called 4.50
+The board is Ts Kc 7d 7h 
+Player 2 bet 19.50
+Player 1 called 19.50
+The board is Ts Kc 7d 7h Ac 
+Player 2 bet 48.05
+Player 1 called 48.05
+Player 1 wins the hand
+
+Player 1 wins the game
+
